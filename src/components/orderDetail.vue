@@ -1,0 +1,212 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:;" @click="routeBack"></a>
+			<h1 class="y-confirm-order-h1">订单详情</h1>
+			<router-link to="/messageIndex">
+				<i></i>
+				<span class="dot" v-if="$store.state.messageCount != 0"><em>{{$store.state.messageCount}}</em></span>
+			</router-link>
+		</header>
+		<div class="main">
+			<div class="orderList_wrap">
+				<div class="my_order_wrap pd">
+					<ul class="yy-myorder-list">
+						<li>
+							<div class="order-tophead">
+								<span class="ott-t">订单编号:</span>
+								<span class="ott-sn">{{orderInfo.order_sn}}</span>
+								<em class="ot-tips" v-if="orderInfo.status == 0">已取消</em>
+								<em class="ot-tips" v-else-if="orderInfo.status == 1">待付款</em>
+								<em class="ot-tips" v-else-if="orderInfo.status == 2">待发货</em>
+								<em class="ot-tips" v-else-if="orderInfo.status == 3">待收货</em>
+								<em class="ot-tips" v-else-if="orderInfo.status == 4">待评价</em>
+								<em class="ot-tips" v-else-if="orderInfo.status == 5">已完成</em>
+							</div>
+							<div class="o_expressMain" v-if="orderInfo.status == 3 || orderInfo.status == 4 || orderInfo.status == 5">
+								<router-link :to="{path:'/logisticsInformation',query:{order_sn:orderInfo.order_sn,express:orderInfo.express,express_sn:orderInfo.express_sn}}">
+									<div class="imgbox">
+										<img src="../assets/images/expressCar_ico.png">
+									</div> 
+									<div class="add">
+										<p class="msg db-overflow">
+											{{shippingDetail.context}}
+										</p> 
+										<p class="a_time">{{shippingDetail.time}}</p>
+									</div>
+									<i class="y-icon2"></i>
+								</router-link>
+							</div>
+							<div class="o_address">
+								<div class="imgbox">
+									<img src="../assets/images/o_address_ico.png">
+								</div> 
+								<div class="add">
+									<p class="user">
+										<span>{{orderInfo.consignee}}</span>
+										<i>{{orderInfo.telephone}}</i>
+									</p> 
+									<p class="a_d db-overflow">{{orderInfo.province_name}}{{orderInfo.city_name}}{{orderInfo.county_name}}{{orderInfo.address}}</p>
+								</div>
+							</div>
+							<div class="y-order-pro">
+								<template v-for="(item,index) in orderInfo.orderDetail">
+						        	<router-link :to="{path:'/goodsDetail',query:{id:item.goods_id}}" class="y-kein" >	 
+						        		<div class="y-imgbox">
+								        	<div class="y-img">
+									        	<div class="ab">
+									        		<img :src="item.goods_image">
+									        	</div>
+								        	</div>
+						        		</div>       		
+							        	<div class="y-jnjcn">
+								        	<p class="y-njcn db-overflow">{{item.goods_name}}</p>
+								        	<div class="y-ws5d">
+									        	<p class="y-price">￥{{item.unit_price}}</p>
+									        </div>
+									        <div class="y_name_t">
+									        	<span>{{item.specifications}}</span>
+									        	<template v-if="orderInfo.status == 4 || orderInfo.status == 5">
+								        			<em class="on">x{{item.goods_number}}</em>
+								        		</template>
+								        		<template v-else>
+								        			<em>x{{item.goods_number}}</em>
+								        		</template>
+								        		<template v-if="orderInfo.status == 4 || orderInfo.status == 5">
+									        		<router-link :to="{path:'/applyForAfterSale',query:{id:item.id}}" class="aos" v-if="item.is_return == 0">申请售后</router-link>
+									        		<router-link :to="{path:'/viewAftermarket',query:{order_sn:orderInfo.order_sn,id:item.id}}" class="aos grey" v-else>查看售后</router-link>
+								        		</template>
+								        	</div>
+							        	</div>
+						        	</router-link>
+					        	</template>
+				        	</div>
+				        	<p class="tt-count">运费：￥0.00</p>
+				        	<p class="tt-count">共 {{orderInfo.goods_number}} 件商品 实付款<em>￥{{orderInfo.make_price}}</em></p>
+				        	<p class="otail"><span>备注内容：</span><span>{{orderInfo.buyer_message}}</span></p>
+				        	<div class="order18-o-imfo">
+				        		<div class="eachl" v-if="orderInfo.status != 0 && orderInfo.status != 1">
+				        			<em class="t-num">支付渠道：</em>
+				        			<span class="num" v-if="orderInfo.pay_type == 1">钱包余额</span>
+				        			<span class="num" v-else-if="orderInfo.pay_type == 2">支付宝支付</span> 
+				        			<span class="num" v-else-if="orderInfo.pay_type == 3">微信支付</span>
+				        		</div> 
+				        		<div class="eachl" v-if="orderInfo.status != 0 && orderInfo.status != 1"> 
+				        			<em class="t-num">支付流水号：</em> 
+				        			<span class="num">{{orderInfo.pay_sn}}</span>
+				        		</div> 
+				        		<div class="eachl">
+				        			<em class="t-num">下单时间：</em> 
+				        			<span class="num">{{orderInfo.add_time | time}}</span>
+				        		</div>
+				        	</div>
+						</li>
+					</ul>
+		        	<div class="o_btnbox" v-if="orderInfo.status == 1">
+			        	<div class="btbox clearfix">
+			        		<a href="javascript:;" class="c1 grey" @click="cancelTheOrder('open')">取消订单</a>
+			        		<router-link :to="{path:'/payment',query:{order_sn:orderInfo.order_sn}}" class="c2">马上支付</router-link>
+			        	</div>
+			        </div>
+			        <div class="o_btnbox" v-else-if="orderInfo.status == 2">
+			        	<div class="btbox clearfix">
+			        		<a href="javascript:;" class="c2" @click="remindDelivery">提醒发货</a>
+			        	</div>
+			        </div>
+			        <div class="o_btnbox" v-else-if="orderInfo.status == 3">
+			        	<div class="btbox clearfix">
+			        		<a href="javascript:;" class="c2" @click="received">确认收货</a>
+			        	</div>
+			        </div>
+			        <div class="o_btnbox" v-else-if="orderInfo.status == 4">
+			        	<div class="btbox clearfix">
+			        		<router-link :to="{path:'/selectGoods',query:{order_sn:orderInfo.order_sn}}" class="c2">评价</router-link>
+			        	</div>
+			        </div>
+			        <div class="o_btnbox" v-else-if="orderInfo.status == 5">
+			        	<div class="btbox clearfix">
+			        		<router-link :to="{path:'/selectGoods',query:{order_sn:orderInfo.order_sn}}" class="c2">查看评价</router-link>
+			        	</div>
+			        </div>
+				</div>
+			</div>
+			<!-- 弹窗 -->
+			<div class="mask" :class="{fadeIn : is_cancel == true,fadeOut : is_cancel == false}"></div>
+			<div class="oy_cancel" :class="{fadeIns : is_cancel == true,fadeOuts : is_cancel == false}">
+				<p>取消订单</p>
+				<p class="tips">您确认取消订单吗？</p>
+				<div class="oyc_btnbox">
+					<span @click="cancelTheOrder('cancel')">取消</span>
+					<span class="sure" @click="cancelTheOrder('sure')">确定</span>
+				</div>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      orderInfo : {},
+      is_cancel : false,
+      shippingDetail : {}
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."});
+    this.getData();
+    this.getSign();
+  },
+  mounted(){
+    this.$store.commit('loading',{show:false});	
+  },
+  methods: {
+    getData(){
+    	this.$http.post('/Shop/Order/orderDetail', {order_sn:this.$route.query.order_sn},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+            	this.orderInfo = response.data.data.orderInfo;   
+            	this.shippingDetail = response.data.data.shippingDetail;  		
+        	}	   
+        });
+    },
+    cancelTheOrder : function(type){
+    	if( type == "sure" ){
+	    	this.$http.post('/Shop/Order/cancelTheOrder', {order_sn:this.$route.query.order_sn},{emulateJSON:true}).then(function(response){
+	        	if( response.data.status == "200000" ){
+	            	this.$store.commit('alert',{show:true,text:response.data.message});
+	            	window.history.go(-1);
+	        	}	   
+	        });
+    		this.is_cancel = false;
+    	}else if(type == "cancel"){
+    		this.is_cancel = false;
+    	}else{
+    		this.is_cancel = true;
+    	}
+    },
+  	remindDelivery : function(){
+  		this.$http.post('/Shop/Order/remindDeliveryOrder',{order_sn:this.$route.query.order_sn},{emulateJSON:true}).then(function(response){
+  			this.$store.commit('alert',{show:true,text:response.data.message});  			
+  		})
+  	},
+  	received : function(){
+  		this.$http.post('/Shop/Order/received',{order_sn:this.$route.query.order_sn},{emulateJSON:true}).then(function(response){
+  			this.$store.commit('alert',{show:true,text:response.data.message});  			
+  		})
+  	},
+    getSign : function(){
+     this.$http.post('/Shop/User/getSign', {},{emulateJSON:true}).then(function(response){
+        if( response.data.status == 200000 ){
+            this.$store.state.messageCount = response.data.data.count;
+        }   
+      });
+  	},
+    routeBack : function(){
+      this.$router.go(-1);
+    }
+  }
+
+}
+</script>
+

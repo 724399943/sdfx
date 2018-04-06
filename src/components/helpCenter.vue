@@ -1,0 +1,51 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:;" @click="routeBack"></a>
+			<h1 class="y-confirm-order-h1">帮助中心</h1>
+		</header>
+		<div class="main">
+			<div class="y-bindphone">
+				<ul>
+					<li v-for="(item,index) in list">
+						<router-link :to="{path:'/helpCenterDetail',query:{id:item.id}}">
+							<span>{{item.title}}</span>
+							<i></i>
+						</router-link>
+					</li>					
+				</ul>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      list : []
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."});
+    this.getData();
+  },
+  mounted(){
+    this.$store.commit('loading',{show:false});
+  },
+  methods: {
+    getData(){
+    	this.$http.post('/Shop/Article/getArtGroup', {sign:'art_help'},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+            	this.list = response.data.data.list;      		
+        	}	   
+        });
+    },
+    routeBack : function(){
+      this.$router.go(-1);
+    }
+  }
+
+}
+</script>
+

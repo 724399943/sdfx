@@ -1,0 +1,98 @@
+<template>
+  	<div class="content" id="RecentBrowse">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">最近浏览</h1>
+			<router-link to="/messageIndex">
+				<i></i>
+				<span class="dot"></span>
+			</router-link>
+		</header>
+		<div class="main">
+			<div class="recentBrowse">
+				<!-- 有浏览记录 -->
+				<div class="igoodsMain swhite" v-if="nothing == 0">
+        		<ul>
+        			<li v-for="(item,index) in goodsList">
+                <router-link :to="{path:'/goodsDetail',query:{id:item.goods_id}}">
+          				<div class="imgbox">
+          					<img :src="item.goods_image">
+          				</div>
+          				<p class="gt">{{item.goods_name}}</p>
+          				<p class="ppt">
+          					<span>￥{{item.goods_price}}元</span>
+          					<span class="buy">{{item.sale_number}}人购买</span>
+          					<em></em>
+          				</p>
+                </router-link>
+        			</li>                      
+        		</ul>
+        	</div>
+        	<!-- 无浏览记录 -->
+        	<div class="rBrowse_no" v-else>
+        		<div class="imgbox">
+        			<img src="../assets/images/recentBrowse_ico.png">
+        		</div>
+        		<p>您还没有浏览记录</p>
+        		<router-link to="/">去商城逛逛</router-link>
+        	</div>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      goodsList : [],
+      nothing : 0,
+      hasAjax:0,
+	    page : 1
+    }
+  },
+  created(){
+  	this.$store.commit('loading',{show:true,text:'加载中...'});
+    this.getGoodList();
+  },
+  mounted(){
+      this.$store.commit('loading',{show:false});
+      this.loadMore();
+  },
+  methods: {
+    getGoodList : function(){
+        if( this.hasAjax == 0 ){
+          this.hasAjax = 1;
+        	this.$http.post('/Shop/Goods/browingHistory', {},{emulateJSON:true}).then(function(response){
+              this.hasAjax = 0;
+              if( this.page == 0 ){
+                 if( response.data.data.list.length > 0 ){
+                   this.goodsList = response.data.data.list;
+                   this.page++;
+                   this.nothing = 0;                  
+                 }else{
+                   this.nothing = 1;
+                 }
+              }else{
+                 if( response.data.data.list.length == 0 ){
+                    this.hasAjax = 1;
+                 }else{
+                    this.page++;
+                    this.goodsList = this.goodsList.concat(response.data.data.list);
+                 }
+              }  
+              this.$store.commit('loading',{show:false});    				
+          });
+        }
+    },
+    loadMore(){
+        var that = this;
+        this.$store.commit('scrollFun',{dom:'RecentBrowse',auto:true,bottomCall:function(){
+          that.getGoodList();
+        }})       
+    }
+  }
+
+}
+</script>
+

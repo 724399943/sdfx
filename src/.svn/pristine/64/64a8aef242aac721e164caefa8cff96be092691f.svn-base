@@ -1,0 +1,74 @@
+<template>
+  <div class="vue-upload-img-multiple">
+     <input type="file" @change="onFileChange">
+  </div>
+</template>
+<script>
+export default {
+  name: 'Upload',
+  data: function () {
+    return {
+      imagelist:[]
+    }
+  },
+  computed:{
+    images(){
+     return this.imagelist;
+    }
+  },
+  props: ['imageNum'],
+  methods: {
+    test () {
+      // var vm = this
+      // console.log(vm.message)
+    },
+    addPic () {
+      //$('input[type=file]').trigger('click')
+     // return false
+    },
+    onFileChange (e) {
+      var files = e.target.files || e.dataTransfer.files
+      if (!files.length) return
+      if(this.imageNum>1){
+        if(this.$store.state.imagelist.length>=this.imageNum){
+          this.$store.commit('msgbox','最多只能上传'+this.imageNum+'图片')
+          return
+        }
+      }else{
+        this.imageNum = 1;
+      }
+      this.createImage(files);
+
+    },
+    createImage (file) {
+      var vm = this
+      var reader = null
+      var leng = file.length
+      for (var i = 0; i < leng; i++) {
+        reader = new window.FileReader()
+        reader.readAsDataURL(file[i])
+        reader.onload = function (e) {
+          if(vm.imageNum<2){
+           // vm.images=[]
+            vm.$store.state.imagelist=[]
+          }
+          //vm.images.push(e.target.result);
+          // console.log(e.target.result);
+          vm.$http.post('/Shop/User/uploadUserImage', {image:e.target.result},{emulateJSON:true}).then(function(response){
+                vm.$store.state.imagelist.push(response.data.data.image)
+          })
+        }
+      }
+    },
+    removeImage: function (e) {
+      //this.images = [];
+     // this.$store.state.image = vm.images;
+    },
+    delImage: function (index) {
+     // this.images.shift(index)
+    }
+  }
+}
+</script>
+
+

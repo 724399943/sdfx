@@ -1,0 +1,97 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">我的邀请码</h1>
+			<router-link to="/messageIndex">
+				<i></i>
+				<span class="dot" v-if="$store.state.messageCount != 0"><em>{{$store.state.messageCount}}</em></span>
+			</router-link>
+		</header>
+		<div class="main">
+			<div class="y-bindphone">
+				<ul>
+					<li class="pli">
+						<a href="javascript:;">
+							邀请码
+							<span>{{userInfo.invite_code}}</span>
+							<i></i>
+						</a>
+					</li>					
+				</ul>
+				<div class="inviteRule">
+					<h1>推荐有奖规则说明</h1>
+					<p class="pt">· 推荐好友得积分！Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+					<p class="pt">· 推荐好友得积分！Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+				</div>
+			</div>
+			<!-- 分享弹窗 -->
+			<div class="ggshare_window slideUp">
+				<p>分享APP下载地址</p>
+				<div class="g_btn">
+					<a :href="'mitchell://share_wechat?text='+shareText+'&url='+webSite+shareRoute">
+						<em class="icon"><i></i>微信好友</em>
+					</a>
+					<a :href="'mitchell://share_wechat_moments?text='+shareText+'&url='+webSite+shareRoute">
+						<em class="icon"><i></i>朋友圈</em>
+					</a>
+					<a :href="'mitchell://share_qq?text='+shareText+'&url='+webSite+shareRoute">
+						<em class="icon"><i></i>QQ好友</em>
+					</a>
+					<a :href="'mitchell://share_sina_weibo?text='+shareText+'&url='+webSite+shareRoute">
+						<em class="icon"><i></i>微博</em>
+					</a>
+				</div>				
+			</div>
+
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      userInfo : {},
+      webSite : '',
+      shareText : '我正在皇家会APP上浏览商品，好东西要和朋友分享~',
+      shareRoute : ''
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."})
+    this.getData();
+    this.getSign();
+    this.deviceFun();
+  },
+  mounted(){
+  	this.$store.commit('loading',{show:false});
+  },
+  methods: {
+    getData(){
+    	this.$http.post('/Shop/User/myInvite', {},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+            	this.userInfo = response.data.data.userInfo;	
+            	this.webSite = response.data.webSite;  
+        	}	   
+        });
+    },
+    getSign : function(){
+     this.$http.post('/Shop/User/getSign', {},{emulateJSON:true}).then(function(response){
+        if( response.data.status == 200000 ){
+            this.$store.state.messageCount = response.data.data.count;
+        }   
+      });
+  	},
+  	deviceFun : function(){  
+	   	if (!!navigator.userAgent.match(/AppleWebKit.*Mobile.*/)) {    
+	       	this.shareRoute = '/mobileShare';
+	   	}else{
+	   		this.shareRoute = '/pcShare';
+	   	} 
+  	}
+  }
+
+}
+</script>
+

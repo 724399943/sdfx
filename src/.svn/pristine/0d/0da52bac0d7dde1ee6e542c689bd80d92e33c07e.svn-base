@@ -1,0 +1,313 @@
+<template>
+  	<div class="content">
+  		<div class="goodsDetail_m">
+			<div class="goods_detail_wrap">
+				<div class="ggoodsImg_wrap">
+					<header class="head gdhead">
+						<a href="javascript:window.history.go(-1);"><span class="back white"></span></a>
+						<h1 class="y-confirm-order-h1">商品详情</h1>
+						<router-link to="/shoppingCart">
+							<span class="gscar white"></span>
+						</router-link>
+					</header>
+					<div class="goods_img_wrap">
+						<swiper auto height="200px" dots-position="center" v-model="slideNum">
+						    <template v-for="(item,index) in imgList ">
+						    	<swiper-item class="black" >
+						    			<div class="goods_img_cont">
+											<div class="goods_img_box">
+												<img class="Sw-img" :src="item.goods_image">
+											</div>
+										</div>
+						    	</swiper-item>
+						    </template>
+						</swiper>
+					</div>
+					<div class="slide_num">{{slideNum+1}}/{{imgList.length}}</div>
+				</div>
+				<div class="goods_msg">
+					<p class="name db-overflow">{{detail.goods_name}}</p>
+					<p class="gat db-overflow">{{detail.introduction}}</p>
+					<div class="g_msg_tt">
+						<span>￥{{detail.goods_price}}</span>
+						<p>热销{{detail.sale_number}}件</p>
+					</div>
+					<div class="select_g_t">
+						<div class="s_g_t">
+							<span>已选择</span>
+							<input type="text" name="" disabled="disabled" value="">
+							<em></em>
+						</div>
+					</div>
+				</div>				
+				<div class="goods_assess">
+					<div class="tt">商品评价({{count}})</div>
+					<div class="g_assess_cont">
+						<div v-if="comment.length > 0">
+							<div class="eva_list_box">
+								<div class="user_eva">
+									<div class="eva_top">
+										<div class="eva_user">
+											<img :src="comment[0].headimgurl">
+											<span>{{comment[0].nickname}}</span>
+										</div>
+										<div class="eva_star_cont">
+											<div class="eva_star_box" :class="{on : comment[0].star>=1}"></div>
+											<div class="eva_star_box" :class="{on : comment[0].star>=2}"></div>
+											<div class="eva_star_box" :class="{on : comment[0].star>=3}"></div>
+											<div class="eva_star_box" :class="{on : comment[0].star>=4}"></div>
+											<div class="eva_star_box" :class="{on : comment[0].star>=5}"></div>
+										</div>
+									</div>
+									<p>{{comment[0].contain}}</p>
+									<div class="eva_goods_cont">
+										<span>{{comment[0].add_time | time}}</span>
+										<span>{{comment[0].attr_list}}</span>
+									</div>
+								</div>
+								<router-link :to="{path:'/goodsComment',query:{goods_id:detail.id}}" class="seemore_eva">查看更多评论</router-link>
+							</div>
+						</div>
+						<div class="nomasg" v-else>暂无评论~</div>
+					</div>
+				</div>
+				<div class="goods_detail" v-html="extension.body">
+					
+				</div>
+				<div class="goods_detail_btn">
+					<div class="g_btn">
+						<router-link to="">
+							<em class="icon"><i></i>咨询</em>
+						</router-link>
+						<a href="javascript:;" @click="toShareFun('open')">
+							<em class="icon"><i></i>分享</em>
+						</a>
+						<a href="javascript:;" @click="toCollect('add')" v-if="collect == 0">
+							<em class="icon"><i></i>收藏</em>
+						</a>
+						<a href="javascript:;" @click="toCollect('cancel')" v-else>
+							<em class="icon"><i></i>已收藏</em>
+						</a>
+					</div>
+					<div class="g_buybtn" @click="addToCart(detail.relevence_id,detail.category_id)">加入购物车</div>
+					<div class="g_addbtn" @click="buyNow(detail.relevence_id,detail.category_id)">立即购买</div>
+				</div>
+				<!-- 编辑规格 -->
+				<div class="select_goods_box" :class="{slideUp : is_onSel == true,slideDown : is_onSel == false}">
+					<div class="s_g_top">
+						<div class="s_g_img">
+							<img :src="detail.goods_image">
+						</div>
+						<p class="s_g_name">{{detail.goods_name}}</p>
+						<span class="s_price">￥{{detail.goods_price}}</span>
+						<em class="close" @click="closeSkuAttr">x</em>
+					</div>
+					<div class="s_g_check_box" v-for="(attr,index) in attrNameInfo">
+						<p>{{attr.attr_name}}</p>
+						<ul class="s_g_c_ul">
+							<li v-for="(val,ind) in attr.attrValue" :class="{'on':attr_list[index] == val.id}" :data-id="val.id"  @click="JchoValue(index,val.id)">{{val.attr_value}}</li>
+						</ul>
+					</div>	
+					<div class="s_g_check_box">
+						<p>数量</p>
+						<div class="num_warp">
+							<span @click="computedNum('sub',detail.goods_number)">-</span>
+							<span class="num">{{number}}</span>
+							<span @click="computedNum('add',detail.goods_number)">+</span>
+						</div>
+					</div>				
+				</div>	
+				<!-- 分享 -->
+				<div class="smask" :class="{fadeIn : is_share == true,fadeOut : is_share == false}"></div>
+				<div class="ggshare_window" :class="{slideUp : is_share == true,slideDown : is_share == false}">
+					<p>懂得分享的人最美~</p>
+					<div class="g_btn">
+						<a href="mitchell://share_wechat">
+							<em class="icon"><i></i>微信好友</em>
+						</a>
+						<a href="mitchell://share_wechat_moments">
+							<em class="icon"><i></i>朋友圈</em>
+						</a>
+						<a href="mitchell://share_qq">
+							<em class="icon"><i></i>QQ好友</em>
+						</a>
+						<a href="mitchell://share_sina_weibo">
+							<em class="icon"><i></i>微博</em>
+						</a>
+					</div>
+					<a href="javascript:;" class="ggclose" @click="toShareFun('close')"><span></span></a>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+<script>
+import {Swiper,SwiperItem}from 'vux/src/components/swiper'
+
+export default {
+
+  data () {
+    return {
+      detail : {},
+      imgList : [],
+      extension : {},
+      slideNum : 0,
+      page:1,
+      comment : [],
+      count : '',
+      attrNameInfo : [],
+      is_onSel : false,
+      number : 1,
+      is_share : false,
+      collect : '',
+      choice : 0,
+      tobuy : 0,
+      goodsID : this.$route.query.id,
+      goodsOn : [],
+      attr_list:[],
+    }
+  },
+  created(){
+  	this.$store.commit('loading',{show:true,text:'加载中...'});
+  	this.getDetail();
+  	this.getGoodsComment();
+  	this.addBrowingHistory();
+  },
+  components : {
+	Swiper,
+    SwiperItem
+  },
+  mounted(){
+  	this.$store.commit('loading',{show:false});
+  },
+  methods: {
+    getDetail(){
+    	this.$http.post('/Shop/Goods/goodsDetail', {id:this.goodsID},{emulateJSON:true}).then(function(response){
+  			if( response.data.status == "200000" ){
+            	this.detail = response.data.data.detail;
+            	this.attr_list = this.detail.attr_list.split(',');
+            	this.imgList = response.data.data.goodsImage;
+            	this.extension = response.data.data.goodsExtension;
+            	this.collect = response.data.data.collect;
+            	
+  			}else{
+  				this.$store.commit('alert',{show:true,text:response.data.message});
+  			}	   
+        });             
+    },
+    getGoodsComment(){
+    	this.$http.post('/Shop/Goods/goodsComment', {goods_id:this.goodsID,page:this.page},{emulateJSON:true}).then(function(response){
+  			if( response.data.status == "200000" ){
+            	this.comment = response.data.data.list;
+            	this.count = response.data.data.count;
+  			}	   
+        });
+    },
+    addBrowingHistory(){
+    	this.$http.post('/Shop/Goods/addBrowingHistory', {goods_id:this.goodsID},{emulateJSON:true}).then(function(response){  				
+        });
+    },
+    closeSkuAttr(){
+    	this.is_onSel = false;
+    	this.choice = 0;
+    	this.tobuy = 0;
+    },
+    addToCart : function(relevence_id,category_id){
+    	if( this.choice == 0 ){
+    		this.is_onSel = true;
+    		this.$http.post('/Shop/Goods/getSkuAttr', {relevence_id:relevence_id,category_id:category_id},{emulateJSON:true}).then(function(response){
+	  			if( response.data.status == "200000" ){
+	            	this.attrNameInfo = response.data.data.attrNameInfo; 
+	            	this.goodsOn = response.data.data.goodsOn;           	
+	  			}	   
+	        });
+	        this.choice = 1;
+    	}else{
+    		this.is_onSel = false;
+	    	this.$http.post('/Shop/Shop/addToCart', {gid:this.goodsID,goodsNumber:this.number,is_buy:0},{emulateJSON:true}).then(function(response){
+	  			if( response.data.status == "200000" ){
+	            	this.$store.commit('alert',{show:true,text:response.data.message});
+	  			}else{
+	  				this.$router.push('/login');
+	  			}	   
+	        });	
+	        this.choice = 0;	
+    	}
+    },
+    buyNow : function(relevence_id,category_id){
+    	if( this.tobuy == 0 ){
+    		this.is_onSel = true;
+    		this.$http.post('/Shop/Goods/getSkuAttr', {relevence_id:relevence_id,category_id:category_id},{emulateJSON:true}).then(function(response){
+	  			if( response.data.status == "200000" ){
+	            	this.attrNameInfo = response.data.data.attrNameInfo;
+	            	this.goodsOn = response.data.data.goodsOn;            	
+	  			}	   
+	        });
+	        this.tobuy = 1;
+    	}else{
+    		this.is_onSel = false;
+	    	this.$http.post('/Shop/Shop/addToCart', {gid:this.goodsID,goodsNumber:this.number,is_buy:1},{emulateJSON:true}).then(function(response){
+	  			if( response.data.status == "200000" ){
+	            	this.$router.push({path:'/orderInfo',query:{id:response.data.data.shoppingCartId}});
+	  			}else{
+	  				this.$router.push('/login');
+	  			}	   
+	        });
+	        this.tobuy = 0;
+    	}
+    },
+    toCollect : function(type){
+    	if( type == 'add' ){
+	    	this.$http.post('/Shop/Collect/addCollect', {goods_id:this.goodsID},{emulateJSON:true}).then(function(response){
+	  			if( response.data.status == "200000" ){
+	            	this.$store.commit('alert',{show:true,text:response.data.message});
+	            	this.collect = 1;
+	  			}	   
+	        });
+    	}else{
+    		this.$http.post('/Shop/Collect/delCollect', {goods_id:this.goodsID},{emulateJSON:true}).then(function(response){
+	  			if( response.data.status == "200000" ){
+	            	this.$store.commit('alert',{show:true,text:response.data.message});
+	            	this.collect = 0;
+	  			}	   
+	        });
+    	}
+    },
+    toShareFun : function(type){
+    	if( type == "open" ){
+    		this.is_share = true;
+    	}else{
+    		this.is_share = false;
+    	}
+    },
+  	computedNum : function(type,number){
+    	if( type == "add" ){
+    		if( this.number < number ){
+    			this.number += 1;
+    		}else{
+    			this.$store.commit("alert",{show:true,text:"该商品数量超出库存！"})
+    		}
+    	}else{
+    		if( this.number <= 1 ){
+    			this.$store.commit("alert",{show:true,text:"商品数量不能低于1！"})
+    		}else{
+    			this.number -= 1;
+    		}
+    	}
+    },
+    JchoValue : function(index,id){
+    	this.attr_list[index] = id;
+    	for (var i =0; i<this.goodsOn.length; i++) {
+    		if(this.attr_list.join(',') === this.goodsOn[i].attr_list){
+    			this.goodsID = this.goodsOn[i].id;
+    			this.getDetail();
+    			this.getGoodsComment();
+    			return; 			
+    		}
+    	}
+    }
+  }
+
+}
+</script>
+

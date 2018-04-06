@@ -1,0 +1,102 @@
+<template>
+  	<div class="content" id="Search">
+    		<header class="head">
+      			<div class="search_cate">
+      				<span class="ser"></span>
+      				<input type="text" name="" autofocus="autofocus" placeholder="请输入搜索产品" v-model="search" @change="getData(true)">
+      				<span class="scanl">X</span>
+      			</div>
+  			   <a href="javascript:;" @click="routeBack"><span class="cancel">取消</span></a>
+  		</header>
+		<div class="search_wrap">
+  			<!-- 搜索结果 -->
+  			<div class="igoodsMain swhite" v-if="noResult == false">
+          		<ul>
+          			<li v-for="(item,index) in list">
+                  <router-link :to="{path:'/goodsDetail',query:{id:item.id}}">
+            				<div class="imgbox">
+            					<img :src="item.goods_image">
+            				</div>
+            				<p class="gt">{{item.goods_name}}</p>
+            				<p class="ppt">
+            					<span>￥{{item.goods_price}}元</span>
+            					<span class="buy">{{item.sale_number}}人购买</span>
+            					<em></em>
+            				</p>
+                  </router-link>
+          			</li>                        		
+          		</ul>
+        </div>
+      	<!-- 搜索无结果 -->
+      	<div class="igoodsMain" v-else>
+      		<h1 class="noresulit">未找到相关信息，建议您换个关键字</h1>
+      	</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      list : [],
+      search : '',
+      hasAjax:0,
+      page : 1,
+      noResult : false,
+      is_first : true
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."});
+  },
+  mounted(){
+      this.$store.commit('loading',{show:false});
+      this.loadMore();
+  },
+  methods: {
+    getData(type){
+        this.is_first = type;
+        if( this.is_first == true ){
+          this.hasAjax = 0;
+          this.page = 1;
+          this.list = [];
+        }
+        if( this.hasAjax == 0 ){
+            this.hasAjax = 1;
+            this.$http.post('/Shop/Goods/goodsList', {page:this.page,search:this.search},{emulateJSON:true}).then(function(response){
+              this.hasAjax = 0;
+              if( this.page == 0 ){
+                 this.list = response.data.data.list; 
+                 this.page++;
+              }else{
+                 if( response.data.data.list.length == 0 ){
+                    this.hasAjax = 0;
+                    if( this.is_first == true ){
+                      this.noResult = true;
+                    }
+                 }else{
+                    this.noResult = false;
+                    this.page++;
+                    this.list = this.list.concat(response.data.data.list);
+                 }
+              }   
+              this.$store.commit('loading',{show:false});   
+              this.search = "";
+            });
+        }
+    },
+    loadMore(){
+        var that = this;
+        this.$store.commit('scrollFun',{dom:'Search',auto:true,bottomCall:function(){
+            that.getData(false);
+      }})             
+    },
+    routeBack : function(){
+      this.$router.go(-1);
+    }
+  }
+
+}
+</script>
+

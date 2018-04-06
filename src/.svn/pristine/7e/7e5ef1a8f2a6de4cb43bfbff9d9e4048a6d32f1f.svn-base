@@ -1,0 +1,43 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">防伪查询</h1>
+			<router-link to="/messageIndex">
+				<i></i>
+				<span class="dot"></span>
+			</router-link>
+		</header>
+		<div class="main">
+			<div class="busiInt_cont posit">
+				<a href="javascript:;">
+					<div class="inforDetail_img">
+						<img src="http://placehold.it/350x150">
+					</div>
+				</a>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      
+    }
+  },
+  created(){
+    
+  },
+  computed: {
+    
+  },
+  methods: {
+
+    
+  }
+
+}
+</script>
+

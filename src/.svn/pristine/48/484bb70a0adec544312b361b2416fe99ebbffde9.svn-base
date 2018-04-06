@@ -1,0 +1,56 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">收支明细</h1>
+			<router-link to="/messageIndex">
+				<i></i>
+				<span class="dot"></span>
+			</router-link>
+		</header>
+		<div class="main">
+			<div class="recordWrap">
+				<div class="set_d_list">
+					<ul>
+						<li v-for="(item,index) in list">
+							<div class="lf">
+								<p class="tt">{{item.content}}</p>
+								<p class="time">{{item.add_time | time}}</p>
+                <span class="success" v-if="item.type == 2">+{{item.amount}}</span>
+                <span class="fail" v-else-if="item.type == 1">-{{item.amount}}</span>
+							</div>
+						</li>						
+					</ul>
+				</div>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      list : []
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."});
+    this.getData();
+  },
+  mounted(){
+  	this.$store.commit('loading',{show:false});
+  },
+  methods: {
+    getData(){
+    	this.$http.post('/Shop/Testing/paymentList', {},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+            	this.list = response.data.data.list;	  
+        	}	   
+        });
+    }
+  }
+
+}
+</script>
+

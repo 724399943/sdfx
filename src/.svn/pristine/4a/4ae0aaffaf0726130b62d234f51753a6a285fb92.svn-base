@@ -1,0 +1,74 @@
+<template>
+  	<div class="content" id="Jcontent">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">消息</h1>
+		</header>
+		<div class="main">
+			<div class="sysNews_wrap">
+				<ul>
+					<li v-for="(item,index) in messageList">
+						<div class="sysbox">
+							<p class="title"><span>{{item.title}}</span><i>{{item.add_time | time}}</i></p>
+							<div class="imgbox">
+								<img :src="item.image">
+							</div>
+							<p class="cont db-overflow">{{item.content}}</p>
+							<router-link :to="{path:'/messageDetail',query:{id:item.id}}" class="seenews">查看详情></router-link>
+						</div>
+					</li>					
+				</ul>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      messageList : [],
+      hasAjax:0,
+      page : 1
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."});
+    this.getData();
+  },
+  mounted(){
+    this.$store.commit('loading',{show:false});
+    this.loadMore();
+  },
+  methods: {
+    getData(){
+    	if( this.hasAjax == 0 ){
+    		this.hasAjax = 1;
+	  		this.$http.post('/Shop/Message/systemsMessage', {},{emulateJSON:true}).then(function(response){
+	  			this.hasAjax = 0;
+	  			if( this.page == 0 ){
+	  				this.messageList = response.data.data.messageList;
+	  				this.page++;
+	  			}else{
+	  				if( response.data.data.messageList.length == 0 ){
+	  					this.hasAjax = 1;
+	  				}else{
+	  					this.page++;
+	  					this.messageList = this.messageList.concat(response.data.data.messageList);
+	  				}
+	  			}
+	  			this.$store.commit('loading',{show:false});	   
+	        });    	
+    	}
+  	},
+  	loadMore(){	        
+        var that = this;
+        this.$store.commit('scrollFun',{dom:'Jcontent',auto:true,bottomCall:function(){
+        	that.getGoodsList();
+        }})
+    }
+  }
+
+}
+</script>
+

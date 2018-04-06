@@ -1,0 +1,258 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<h1 class="y-confirm-order-h1">购物车</h1>
+			<a href="javascript:window.history.go(-1);"><span class="mail">完成</span></a>
+		</header>
+		<div class="main">
+			<div class="shopcarGoods" v-if="is_sign == 1 && list != ''">
+				<div class="integral_goods">
+					<div class="is_hgoods">
+						<div class="sel_goodsm">
+							<ul>
+								<li v-for="(item,index) in list">
+									<div class="s_goods_wrap">
+										<div class="s_cbox">
+											<input type="checkbox" name="" :id="item.goods_id" :value="item.goods_id" v-model="goods_id" @change="checkFun(item.id)"> 
+											<label :for="item.goods_id"></label>
+										</div>
+									</div> 
+									<a href="javascript:;">
+										<div class="imgbox">
+											<img :src="item.goods_image">
+										</div>
+										<div class="se_ggg sexiao">
+										 	<h1 class="db-overflow">{{item.goods_name}}</h1>
+										 	<p class="ggpt ggattr" @click="JselAttr('edit',item,item.attr_list)"><span v-for="(it,index) in item.attrList">{{it.attr_value}} </span> <em></em></p>
+										 	<div class="seggbox">
+										 		<span class="price">￥{{item.goods_price}}</span>
+										 		<div class="segnum">
+										 			<span>-</span>
+										 			<span class="num">{{item.goods_number}}</span>
+										 			<span>+</span>
+										 		</div>
+										 	</div>
+										</div>
+									</a>
+								</li>
+							</ul>
+						</div> 
+					</div>
+				</div>
+			</div>
+			<!-- 未登录 -->
+			<div class="nologin_cont" v-if="is_sign == 0">
+				<img src="../assets/images/scnogoods_ico.png">
+				<p>您尚未登录</p>
+				<div class="btn">
+					<router-link to="/register">注册</router-link>
+					<router-link to="/login" class="login">登录</router-link>
+				</div>
+			</div>
+
+		  	<!-- 购物车暂无商品 -->
+			<div class="nologin_cont" v-if="list == '' ">
+				<img src="../assets/images/scnogoods_ico.png">
+				<p>您的购物车暂无商品~</p>
+				<router-link to="/" class="suibtn">随便逛逛</router-link>
+			</div>
+
+			<!-- 编辑规格 -->
+			<div class="smask" :class="{fadeIn:onedit == true,fadeOut:onedit == false}"></div>
+			<div class="select_goods_box" :class="{slideUps:onedit == true,slideDown:onedit == false}">
+				<div class="s_g_top">
+					<div class="s_g_img">
+						<img :src="selJson.goods_image">
+					</div>
+					<p class="s_g_name">{{selJson.goods_name}}</p>
+					<span class="s_price">￥{{selJson.goods_price}}</span>
+					<em class="close" @click="JselAttr('close')">x</em>
+				</div>
+				<div class="s_g_check_box" v-for="(item,index) in attrList">
+					<p>{{item.attr_name}}</p>
+					<ul class="s_g_c_ul">
+						<li v-for="(val,ind) in item.attrValue" :class="{'on':attr_list[index] == val.id}" :data-id="val.id"  @click="JchoValue(index,val.id)">{{val.attr_value}}</li>	
+					</ul>
+				</div>				
+				<div class="s_g_check_box">
+					<p>数量</p>
+					<div class="num_warp">
+						<span @click="computedNum('sub',selJson.number)">-</span>
+						<span class="num">{{number}}</span>
+						<span @click="computedNum('add',selJson.number)">+</span>
+					</div>
+				</div>
+				<a href="javascript:;" class="seg_finash" @click="editShoppingCart">完成</a>
+			</div>
+			<div class="goods_total" v-if="is_sign == 0,list != ''">
+				<div class="gtal_m edittal">
+					<div class="gtalcheck">
+						<div class="check_box">
+							<input type="checkbox" name="" id="AllCheck" @change="checkedAll">
+							<label for="AllCheck"></label>
+						</div>
+					</div>
+					<span class="all">全选</span>
+				</div>
+				<div class="gtalbtn">
+					<a href="javascript:;" @click="delShoppingCart">删除</a>
+					<a href="javascript:;" @click="addCollect">收藏</a>
+				</div>
+			</div>			
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      list : [],
+      total : '',
+      is_sign : 1,
+      number : 1,
+      goods_id : [],
+      goodsID : '',
+      attrList : [],
+      selJson : {},
+      onedit : false,
+      shop_id : [],
+      shopID : '',
+      goodsOn : [],
+      attr_list:[],
+      gid : '',
+      id : ''
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."});
+    this.getData();
+  },
+  mounted(){
+  	this.$store.commit('loading',{show:false});
+  },
+  methods: {
+  	getData : function(){
+  		this.$http.post('/Shop/Shop/shoppingCart', {},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "400009" ){
+        		this.is_sign = 0;
+        	}else{
+        		this.is_sign = 1;
+        		this.list = response.data.data.result.shoppingCart;
+        		this.total = response.data.data.result.total;        		
+        	}	   
+        });
+  	},
+  	addCollect : function(){
+  		this.goodsID = this.goods_id.join(',');
+  		if( this.goods_id == '' ){
+  			this.$store.commit('alert',{show:true,text:"请选择商品~"});
+  		}else{
+	    	this.$http.post('/Shop/Collect/addCollect', {goods_id:this.goodsID},{emulateJSON:true}).then(function(response){
+	        	if( response.data.status == "200000" ){
+	            	this.$store.commit('alert',{show:true,text:response.data.message});       		
+	        	}	   
+	        });  			
+  		}
+    },
+    editShoppingCart : function(){
+    	this.$http.post('/Shop/Shop/editShoppingCart', {id:this.id,gid:this.gid,number:this.number},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+        		this.onedit = false;
+            	this.$store.commit('alert',{show:true,text:response.data.message}); 
+            	window.location.href = window.location.href;    		
+        	}	   
+        });
+    },
+    delShoppingCart : function(){
+    	this.shopID = this.shop_id.join(',');
+    	if( this.shop_id == '' ){
+    		this.$store.commit('alert',{show:true,text:"请选择商品~"});
+    	}else{
+	    	this.$http.post('/Shop/Shop/delShoppingCart', {id:this.shopID},{emulateJSON:true}).then(function(response){
+	        	if( response.data.status == "200000" ){
+	            	this.$store.commit('alert',{show:true,text:response.data.message});  
+	            	window.location.href = window.location.href;   		
+	        	}	   
+	        });    		
+    	}
+    },
+    checkFun : function(id){
+  		var el = document.getElementById('AllCheck');
+  		if( this.goods_id.length == this.list.length ){
+  			el.checked = true;
+  		}else{
+  			el.checked = false;
+  		}
+  		if( event.target.checked ){
+  			this.shop_id.push(id);
+  		}else{
+  			for(var i = 0;i < this.shop_id.length;i++){
+  				if( this.shop_id[i] == id ){
+  					this.shop_id.splice(i,1);
+  				}
+  			}
+  		}
+  	},
+  	checkedAll : function(){
+  		this.goods_id = [];	
+  		this.shop_id = [];	
+  		if( event.target.checked ){
+	  		for(var i = 0;i < this.list.length;i++){
+	  			this.goods_id.push(this.list[i]['goods_id']);
+	  			this.shop_id.push(this.list[i]['id']);
+	  		}
+  		}
+  	},
+    JselAttr : function(type,item,attr){
+    	if( type == 'edit' ){
+    		this.onedit = true;
+    		this.selJson['goods_image'] = item.goods_image;
+	    	this.selJson['goods_name'] = item.goods_name;
+	    	this.selJson['goods_price'] = item.goods_price;
+	    	this.selJson['number'] = item.number;
+	    	this.number = Number(item.goods_number);
+	    	this.attr_list = attr.split(',');
+	    	this.gid = item.goods_id;
+	    	this.id = item.id;
+	    	this.$http.post('/Shop/Goods/getSkuAttr', {relevence_id:item.relevence_id,category_id:item.category_id},{emulateJSON:true}).then(function(response){
+	        	if( response.data.status == "200000" ){
+	            	this.attrList = response.data.data.attrNameInfo;	
+	            	this.goodsOn = response.data.data.goodsOn;        		
+	        	}	   
+	        });
+    	}else{
+    		this.onedit = false;
+    	}
+    },
+    JchoValue : function(index,id){
+    	this.attr_list[index] = id;
+    	for (var i =0; i<this.goodsOn.length; i++) {
+    		if(this.attr_list.join(',') == this.goodsOn[i].attr_list){
+    			this.gid = this.goodsOn[i].id;  
+    			this.getData();  		
+    			return; 			
+    		}
+    	}
+    },
+  	computedNum : function(type,number){
+    	if( type == "add" ){
+    		if( this.number < number ){
+    			this.number += 1;
+    		}else{
+    			this.$store.commit("alert",{show:true,text:"该商品超出库存！"})
+    		}
+    	}else{
+    		if( this.number <= 1 ){
+    			this.$store.commit("alert",{show:true,text:"不能再低了！"})
+    		}else{
+    			this.number -= 1;
+    		}
+    	}
+    }
+    
+  }
+
+}
+</script>
+

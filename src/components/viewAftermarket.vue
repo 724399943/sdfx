@@ -1,0 +1,111 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:;" @click="routeBack"></a>
+			<h1 class="y-confirm-order-h1">查看售后</h1>
+			<span class="mail" v-if="returnInfo.status == 0">审核中</span>
+			<span class="mail on" v-else-if="returnInfo.status == 1">申请成功</span>
+			<span class="mail" v-else>申请失败</span>
+		</header>
+		<div class="main">
+			<div class="evaluate_m">
+				<div class="y-order-pro">
+	        		<a href="" class="y-kein">	 
+		        		<div class="y-imgbox">
+				        	<div class="y-img">
+					        	<div class="ab">
+					        		<img :src="returnInfo.goods_image">
+					        	</div>
+				        	</div>
+		        		</div>       		
+			        	<div class="y-jnjcn">
+				        	<p class="y-njcn db-overflow">{{returnInfo.goods_name}}</p>
+				        	<div class="y-ws5d">
+					        	<span>{{returnInfo.specifications}}</span>
+					        </div>
+					        <div class="y_name_t">
+				        		<p class="y-price">￥{{returnInfo.unit_price}}</p>
+				        		<em>x{{returnInfo.goods_number}}</em>
+				        	</div>
+			        	</div>
+		        	</a>		    
+	        	</div>
+				<div class="goods_assess">
+					<div class="eva_list_box">
+						<div class="user_eva">
+							<div class="eva_top">
+								<div class="eva_user">
+									<img :src="userInfo.headimgurl">
+									<span>{{userInfo.nickname}}</span>
+								</div>								
+							</div>
+							<p>{{returnInfo.explain}}</p>
+							<div class="eva_goodsimg">
+								<div class="imgbox" v-for="(it,index) in returnInfo.image">
+									<img :src="it" @click="showBigImg('big',it)">
+								</div>							
+							</div>
+							<div class="eva_goods_cont">
+								<span>{{returnInfo.add_time | time}}</span>
+								<span>{{returnInfo.specifications}}</span>								
+							</div>
+						</div>
+						<div class="business_reply" v-if="returnInfo.status != 0">
+							<p><span>平台回复：</span>{{returnInfo.shop_reply}}<i>{{returnInfo.update_time | time}}</i></p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 弹窗 -->
+			<div class="mask" :class="{fadeIn : onshow == true,fadeOut : onshow == false}" @click="showBigImg('close')"></div>
+			<!-- <div class="bigevaimg" :class="{fadeIn : onshow == true,fadeOut : onshow == false}"> -->
+				<div class="msevaimg" v-show="onshow == true">
+					<img src="http://placehold.it/350x150" id="JbigImg">
+				</div>
+			<!-- </div> -->
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      returnInfo : {},
+      userInfo : {},
+      onshow : false
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."});
+  },
+  mounted(){
+  	  this.getData();
+      this.$store.commit('loading',{show:false});
+  },
+  methods: {
+    getData(){
+    	this.$http.post('/Shop/Order/seeReturnOrder', {id:this.$route.query.id,order_sn:this.$route.query.order_sn},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+            	this.returnInfo = response.data.data.returnInfo;  
+            	this.userInfo = response.data.data.userInfo;     		
+        	}	   
+        });
+    },
+    showBigImg : function(type,url){
+    	if( type == "big" ){
+    		this.onshow = true;
+    		var JbigImg = document.getElementById('JbigImg');
+    		JbigImg.setAttribute('src',url);
+    	}else{
+    		this.onshow = false;
+    	}
+    },
+    routeBack : function(){
+      this.$router.go(-1);
+    }
+  }
+
+}
+</script>
+

@@ -1,0 +1,87 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">设置</h1>
+		</header>
+		<div class="main">
+			<div class="y-bindphone">
+				<ul>
+					<li>
+						<router-link to="/helpCenter">
+							<span>帮助中心</span>
+							<i></i>
+						</router-link>
+					</li>
+					<li>
+						<router-link to="/feedback">
+							<span>意见反馈</span>
+							<i></i>
+						</router-link>
+					</li>
+					<li class="editpsw">
+						<router-link :to="{path:'/signArticle',query:{sign:'app_userAgreement'}}">
+							<span>用户协议</span>
+							<i></i>
+						</router-link>
+					</li>
+					<li>
+						<router-link :to="{path:'/signArticle',query:{sign:'version'}}">
+							<span>版本信息</span>
+							<i></i>
+						</router-link>
+					</li>
+					<li>
+						<router-link :to="{path:'/signArticle',query:{sign:'app_usrAboutUs'}}">
+							<span>关于我们</span>
+							<i></i>
+						</router-link>
+					</li>
+					<li class="editpsw" @click="updateFun">
+						<a href="javascript:;">
+							<span>检查更新</span>
+							<i></i>
+						</a>
+					</li>
+				</ul>
+			</div>
+			<a href="javascript:;" class="widup" @click="logout">退出登录</a>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+
+    }
+  },
+  created(){
+    
+  },
+  computed: {
+    
+  },
+  methods: {
+    logout(){
+    	localStorage.session_id = '';
+    	this.$http.post('/Shop/Login/logout', {},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+            	this.$store.commit('alert',{show:true,text:response.data.message});
+            	this.$router.push('/login');      		
+        	}	   
+        });
+    },
+    updateFun(){
+    	this.$http.post('/Shop/Article/getSignData', {sign:'version'},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+            	this.$store.commit('confirm',{show:true,title:response.data.data.detail.title,text:response.data.data.detail.content});      		
+        	}	   
+        });
+    }
+  }
+
+}
+</script>
+

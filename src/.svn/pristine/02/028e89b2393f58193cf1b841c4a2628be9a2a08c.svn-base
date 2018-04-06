@@ -1,0 +1,96 @@
+<template>
+  	<div class="content" id="GoodsList">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">商品列表</h1>
+			<router-link to="/search"><span class="gsearch"></span></router-link>
+			<router-link to="/shoppingCart"><span class="gscar"></span></router-link>
+		</header>
+		<div class="main">
+			<div class="goodslist_main">
+				<div class="ggslistTab">
+					<span :class="{on : sortType == parseInt(0)}" @click="tabFun(0)">综合</span>
+					<span :class="{on : sortType == parseInt(1)}" @click="tabFun(1)">销量最高</span>
+					<span :class="{on : sortType == parseInt(2)}" @click="tabFun(2)">价格最低</span>
+					<span :class="{on : sortType == parseInt(3)}" @click="tabFun(3)">评价最高</span>
+				</div>
+				<div class="gggoods gmp">
+					<div class="igoodsMain">
+		        		<ul>
+		        			<li v-for="(item,index) in goodsList">
+		        				<router-link :to="{path:'goodsDetail',query:{id:item.id}}">
+			        				<div class="imgbox">
+			        					<img :src="item.goods_image">
+			        				</div>
+			        				<p class="gt">{{item.goods_name}}</p>
+			        				<p class="ppt">
+			        					<span>￥{{item.goods_price}}元</span>
+			        					<span class="buy">{{item.sale_number}}人购买</span>
+			        					<em></em>
+			        				</p>
+			        			</router-link>
+		        			</li>		        					        			
+		        		</ul>
+		        	</div>
+				</div>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      goodsList : [],
+  	  hasAjax:0,
+  	  page : 1,
+  	  sortType : 0
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:'加载中...'});
+  	this.getGoodsList();
+  },   
+  mounted(){
+      this.$store.commit('loading',{show:false});
+      this.loadMore();
+  },
+  methods: {
+  	getGoodsList : function(){
+          if( this.hasAjax == 0 ){
+            this.hasAjax = 1;
+          	this.$http.post('/Shop/Goods/goodsList', {page:this.page,catid:this.$route.query.catid,sortType:this.sortType},{emulateJSON:true}).then(function(response){    
+                this.hasAjax = 0;
+                if( this.page == 0 ){
+                   this.goodsList = response.data.data.list;
+                   this.page++;
+                }else{
+                   if( response.data.data.list == 0 ){
+                      this.hasAjax = 1;
+                   }else{
+                      this.page++;
+                      this.goodsList = this.goodsList.concat(response.data.data.list);
+                   }
+                }		    		              	 
+                this.$store.commit('loading',{show:false});
+              });
+          }
+    },
+    tabFun : function(index){
+    	this.sortType = index;
+    	this.goodsList = [];
+    	this.page = 1;
+    	this.getGoodsList();
+    },
+    loadMore(){
+        var that = this;
+        this.$store.commit('scrollFun',{dom:'GoodsList',auto:true,bottomCall:function(){
+          that.getGoodsList();
+        }})
+    }  
+  }
+
+}
+</script>
+

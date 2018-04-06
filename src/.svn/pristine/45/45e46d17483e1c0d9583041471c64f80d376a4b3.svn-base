@@ -1,0 +1,79 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">充值</h1>
+		</header>
+		<div class="main">
+			<div class="withdrawals">
+				<div class="wdraw_top">
+					<p>充值金额</p>
+					<input type="text" name="" placeholder="请输入(最低充值100元)" v-model="amount">
+				</div>
+				<div class="paywrap">
+					<ul>
+						<li @click="rechargeFun('wechat')" :class="{on:is_sel == 'wechat'}">
+							<div class="o_pay">
+								<em class="wechat"></em>
+								<span>微信支付</span>
+							</div>
+						</li>
+						<li @click="rechargeFun('alipay')" :class="{on:is_sel == 'alipay'}">
+							<div class="o_pay">
+								<em class="alipay"></em>
+								<span>支付宝支付</span>
+							</div>
+						</li>						
+					</ul>
+					<div class="topay">
+						<span>应付金额</span>
+						<i>￥{{amount}}</i>
+						<a href="javascript:;" class="pay_btn" @click="toPay">付款</a>
+					</div>
+				</div>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      is_sel : 'wechat',
+      amount : ''
+    }
+  },
+  created(){
+    
+  },
+  computed: {
+    
+  },
+  methods: {   
+    rechargeFun : function(type){    	
+	    switch (type){	    	
+	    	case "wechat" :
+	    		this.is_sel = "wechat";
+	    	break;
+	    	case "alipay" : 
+	    		this.is_sel = "alipay";	    		
+	    	break;	    	
+	    }
+    },
+    toPay : function(){
+    	this.$http.post('/Shop/Pay/recharge', {amount:this.amount,type:this.is_sel},{emulateJSON:true}).then(function(response){	
+			if( response.data.status == '200000' ){
+				window.location.href="mitchell://myWallet?type="+this.is_sel+"&amount="+this.amount;
+				this.amount = '';				
+			}else{
+				this.$store.commit('alert',{show:true,text:response.data.message});
+				this.amount = '';
+			}    	
+	    });   	
+    }
+  }
+
+}
+</script>
+

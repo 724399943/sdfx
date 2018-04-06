@@ -1,0 +1,91 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">查看评价</h1>
+			<router-link to="/messageIndex">
+				<i></i>
+				<span class="dot"></span>
+			</router-link>
+		</header>
+		<div class="main">
+			<div class="goods_assess">
+				<div class="eva_list_box">
+					<div class="user_eva">
+						<div class="eva_top">
+							<div class="eva_user">
+								<img :src="commentInfo.headimgurl">
+								<span>{{commentInfo.nickname}}</span>
+							</div>
+							<div class="eva_star_cont">
+								<div class="eva_star_box" :class="{on : commentInfo.star>=1}"></div>
+								<div class="eva_star_box" :class="{on : commentInfo.star>=2}"></div>
+								<div class="eva_star_box" :class="{on : commentInfo.star>=3}"></div>
+								<div class="eva_star_box" :class="{on : commentInfo.star>=4}"></div>
+								<div class="eva_star_box" :class="{on : commentInfo.star>=5}"></div>
+							</div>
+						</div>
+						<p>{{commentInfo.contain}}</p>
+						<div class="eva_goodsimg">
+							<div class="imgbox" v-for="(item,index) in commentInfo.images">
+								<img :src="item" @click="showBigImg('big',item)">
+							</div>							
+						</div>
+						<div class="eva_goods_cont">
+							<span>{{commentInfo.add_time | time}}</span>
+							<span>{{commentInfo.attr_list}}</span>
+						</div>
+					</div>
+					<div class="business_reply" v-if="commentInfo.is_save == 1">
+						<p><span>商家回复：</span>{{commentInfo.message_reply}}</p>
+					</div>
+				</div>				
+			</div>
+		</div>
+		<!-- 弹窗 -->
+		<div class="mask" :class="{fadeIn : onshow == true,fadeOut : onshow == false}" @click="showBigImg('close')"></div>
+		<!-- <div class="bigevaimg" :class="{fadeIn : onshow == true,fadeOut : onshow == false}"> -->
+			<div class="msevaimg" v-show="onshow == true">
+				<img src="http://placehold.it/350x150" id="JbigImg">
+			</div>
+		<!-- </div> -->
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      commentInfo : {},
+      onshow : false
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."});
+    this.getData();
+  },
+  mounted(){
+  	this.$store.commit('loading',{show:false});
+  },
+  methods: {
+    getData(){
+    	this.$http.post('/Shop/Comment/seeComment', {id:this.$route.query.id},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+            	this.commentInfo = response.data.data.commentInfo;	             	             	    
+        	}	   
+        });
+    },
+    showBigImg : function(type,url){
+    	if( type == "big" ){
+    		this.onshow = true;
+    		var JbigImg = document.getElementById('JbigImg');
+    		JbigImg.setAttribute('src',url);
+    	}else{
+    		this.onshow = false;
+    	}
+    }
+  }
+
+}
+</script>
+

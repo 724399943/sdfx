@@ -1,0 +1,62 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">物流信息</h1>
+			<i></i>
+			<span class="dot"></span>
+		</header>
+		<div class="main">
+			<div class="y-trace-express">
+				<p>订单编号：{{order_sn}}</p>
+				<p>快递公司：{{express}}</p>
+				<p>快递单号：{{express_sn}}</p>
+			</div>
+			<div class="y-traceexpress-li">
+				<div class="paddingli">
+					<ul class="yt-ul">
+						<li class="on">
+							<i class="point"></i>
+							<p class="pl">在官网“运单资料&签收图”，可查看签收人信息：广州市</p>
+							<p class="time">2016-09-29 19:35:36</p>
+						</li>
+						<li>
+							<i class="point"></i>
+							<p class="pl">已签收，感谢使用顺丰，期待再次为您服务：广州市</p>
+							<p class="time">2016-09-29 19:35:36</p>
+						</li>
+						<li>
+							<i class="point"></i>
+							<p class="pl">正在派送途中,请您准备签收（派件人：张华华，电话:</p>
+							<p class="time">2016-09-29 19:35:36</p>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      order_sn : this.$route.query.order_sn,
+      express_sn : this.$route.query.express_sn,
+      express : this.$route.query.express
+    }
+  },
+  created(){
+    
+  },
+  computed: {
+    
+  },
+  methods: {
+
+    
+  }
+
+}
+</script>
+

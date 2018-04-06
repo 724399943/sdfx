@@ -1,0 +1,91 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">评价</h1>
+			<span class="mail" @click="commitFun">发布</span>
+		</header>
+		<div class="main">
+			<div class="evaluate_m">
+				<div class="goods_assess pdv">
+					<p class="eept">请选择星数</p>
+					<div class="eva_top pdv">
+						<div class="eva_star_cont">
+							<div class="eva_star_box" :class="{'on':star>0}" @click="onstarFun(1)"></div> 
+							<div class="eva_star_box" :class="{'on':star>1}" @click="onstarFun(2)"></div> 
+							<div class="eva_star_box" :class="{'on':star>2}" @click="onstarFun(3)"></div> 
+							<div class="eva_star_box" :class="{'on':star>3}" @click="onstarFun(4)"></div> 
+							<div class="eva_star_box" :class="{'on':star==5}" @click="onstarFun(5)"></div>
+						</div>
+					</div>
+				</div>
+				<div class="msgbox">
+					<textarea placeholder="宝宝满足你的期待吗？说说它的优点和美中不足的地方吧(150字以内)" v-model="contain"></textarea>
+					<div class="add_g_de">
+						<div class="g_imgm">
+							<ul>
+								<li v-for="(pic,index) in url">
+									<div class="imgbox">
+										<img :src="pic"> 
+										<em @click="removeImg(index)"></em>
+									</div>
+								</li> 
+								<li id="filePicker">
+									<div class="upload_input">
+										<input type="file" name="upload_input" id="upload_input">
+										<div class="upfile-box">
+							                <vue-core-image-upload class="btn btn-primary" :crop="false" @imageuploaded="imageuploaded"   :max-file-size="5242880" 
+							                url="/Shop/Comment/photoSave" ></vue-core-image-upload>
+							            </div>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+import VueCoreImageUpload from 'vue-core-image-upload'
+export default {
+
+  data () {
+    return {
+      contain : '',
+      url : [],
+      image : '',
+      star : 0
+    }
+  },
+  created(){
+    
+  },
+  components: {
+    'vue-core-image-upload': VueCoreImageUpload,
+  },
+  methods: {
+  	commitFun : function(){
+    	this.$http.post('/Shop/Comment/addComment', {id:this.$route.query.id,order_sn:this.$route.query.order_sn,contain:this.contain,images:this.url,star:this.star},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+            	this.$store.commit('alert',{show:true,text:response.data.message});  
+            	window.history.go(-1);
+        	}else{
+        		this.$store.commit('alert',{show:true,text:response.data.message});
+        	}
+        })
+  	},imageuploaded(res) {
+  		this.url.push(res.data.url);  		
+    },
+    removeImg : function(index){
+    	this.url.splice(index,1);
+    },
+    onstarFun(num){
+    	this.star = num;
+    }
+  }
+
+}
+</script>
+

@@ -1,0 +1,94 @@
+<template>
+  	<div class="content" id="CollectList">
+  		<header class="head">
+			<a class="back" href="javascript:;" @click="routeBack"></a>
+			<h1 class="y-confirm-order-h1">我的收藏</h1>
+			<router-link to="/messageIndex">
+				<i></i>
+				<span class="dot" v-if="$store.state.messageCount != 0"><em>{{$store.state.messageCount}}</em></span>
+			</router-link>
+		</header>
+		<div class="main">
+			<div class="collectMain">
+				<div class="igoodsMain">
+	        		<ul>
+	        			<li v-for="(item,index) in collectList">
+	        				<router-link :to="{path:'/goodsDetail',query:{id:item.goods_id}}">
+		        				<div class="imgbox">
+		        					<img :src="item.goods_image">
+		        				</div>
+		        				<p class="gt">{{item.goods_name}}</p>
+		        				<p class="ppt">
+		        					<span>￥{{item.goods_price}}元</span>
+		        					<span class="buy">{{item.sale_number}}人购买</span>
+		        					<em></em>
+		        				</p>
+		        			</router-link>
+	        			</li>	        			
+	        		</ul>
+	        	</div>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      collectList : [],
+      hasAjax : 0,
+      page : 1
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."});
+    this.getData();
+    this.getSign();
+  },
+  mounted(){
+    this.$store.commit('loading',{show:false});	
+    this.loadMore();
+  },
+  methods: {
+    getData(){
+    	if( this.hasAjax == 0 ){
+    		this.hasAjax = 1;
+	    	this.$http.post('/Shop/Collect/goodsCollectList', {page:this.page},{emulateJSON:true}).then(function(response){
+	    		this.hasAjax = 0;
+	        	if( this.page == 0 ){
+	            	this.collectList = response.data.data.collectList; 
+	            	this.page++;     		
+	        	}else{
+	        		if (response.data.data.collectList.length == 0) {
+	        			this.hasAjax = 1;
+	        		}else{
+	        			this.page++;
+	        			this.collectList = this.collectList.concat(response.data.data.collectList);
+	        		}
+	        	}	
+	        	this.$store.commit('loading',{show:false});   
+	        });    		
+    	}
+    },
+  	loadMore(){
+        var that = this;
+        this.$store.commit('scrollFun',{dom:'CollectList',auto:true,bottomCall:function(){
+        	that.getData();
+        }})        
+    },
+    getSign : function(){
+     this.$http.post('/Shop/User/getSign', {},{emulateJSON:true}).then(function(response){
+        if( response.data.status == 200000 ){
+            this.$store.state.messageCount = response.data.data.count;
+        }   
+      });
+  	},
+    routeBack : function(){
+      this.$router.go(-1);
+    }
+  }
+
+}
+</script>
+

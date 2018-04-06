@@ -1,0 +1,150 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">申请售后</h1>
+			<span class="mail" @click="addReturnGoods">提交</span>
+		</header>
+		<div class="main">
+			<div class="evaluate_m">
+				<div class="y-order-pro">
+	        		<a href="javascript:;" class="y-kein">	 
+		        		<div class="y-imgbox">
+				        	<div class="y-img">
+					        	<div class="ab">
+					        		<img :src="orderInfo.goods_image">
+					        	</div>
+				        	</div>
+		        		</div>       		
+			        	<div class="y-jnjcn">
+				        	<p class="y-njcn db-overflow">{{orderInfo.goods_name}}</p>
+				        	<div class="y-ws5d">
+					        	<span>{{orderInfo.specifications}}</span>
+					        </div>
+					        <div class="y_name_t">
+				        		<p class="y-price">￥{{orderInfo.price}}</p>
+				        		<em>x{{orderInfo.goods_number}}</em>
+				        	</div>
+			        	</div>
+		        	</a>		    
+	        	</div>
+				<div class="msgbox">
+					<textarea placeholder="请描述您需要退货或者换货的理由，会有客服与您联系~(150字以内)" v-model="note"></textarea>
+					<div class="add_g_de">
+						<div class="g_imgm">
+							<ul>
+								<li v-for="(pic,index) in imageList">
+									<div class="imgbox">
+										<img :src="pic"> 
+										<em @click="removeImg(index)"></em>
+									</div>
+								</li> 
+								<li id="filePicker">
+									<div class="upload_input">
+										<input type="file" name="upload_input" id="upload_input">
+										<div class="upfile-box">
+											<input type="file" name="" @change="imageuploaded" v-if="iphone == true">
+											<input type="button" @click="choose" v-else-if="android == true">
+							            </div>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      orderInfo : {},
+      imageList : [],
+      id : '',
+      note : '',
+      iphone : false,
+      android : false
+    }
+  },
+  created(){
+  	var ua = navigator.userAgent.toLowerCase();
+    if (ua.indexOf('micromessenger') == -1) {
+      if (ua.indexOf('iphone') != -1 || ua.indexOf('ipad') != -1 || ua.indexOf('ipod') != -1) {
+            this.iphone = true;
+            this.android = false;
+        } else {
+            this.iphone = false;
+            this.android = true;
+        }
+    }
+    window.onChooseResult = this.onChooseResult;
+    this.$store.commit('loading',{show:true,text:"加载中..."});
+    this.getData();
+  },
+  mounted(){
+    this.$store.commit('loading',{show:false});	
+  },
+  components: {
+    
+  },
+  methods: {    
+    getData(){
+    	this.$http.post('/Shop/Order/returnOrder', {id:this.$route.query.id},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+            	this.orderInfo = response.data.data.orderInfo;  
+            	this.id = response.data.data.orderInfo.id;     		
+        	}	   
+        });
+    },
+    addReturnGoods : function(){
+    	if( this.note == '' ){
+    		this.$store.commit('alert',{show:true,text:'请输入您需要退货或者换货的理由~'});
+    	}else{    	
+	    	this.$http.post('/Shop/Order/addReturnGoods', {id:this.$route.query.id,order_sn:this.orderInfo.order_sn,images:this.imageList,note:this.note},{emulateJSON:true}).then(function(response){    	
+	        	if( response.data.status == "200000" ){
+	        		this.$store.commit('alert',{show:true,text:response.data.message});
+	        		setTimeout(function(){
+	        			window.history.go(-1);
+	        		},1500)
+	        	}else{
+	        		this.$store.commit('alert',{show:true,text:response.data.message});
+	        	}	   
+	        })
+	    }	
+    },
+    imageuploaded(e){
+    	var that = this;
+    	var files = e.target.files || e.dataTransfer.files
+    	var reader = null;
+    	reader = new window.FileReader();
+    	reader.readAsDataURL(files[0]);
+    	reader.onload = function(e){
+    		that.$http.post('/Shop/Comment/photoSave', {image:e.target.result},{emulateJSON:true}).then(function(response){
+	        	if( response.data.status == "200000" ){
+	            	that.imageList.push(response.data.data.url);
+	        	}
+	        })
+    	}
+    },
+    removeImg : function(index){
+    	this.imageList.splice(index,1);
+    },
+    choose(){
+      //点击选择图片，js调用Android打开相册
+        JSInterface.choose();
+    },
+    onChooseResult(images){
+      var imagesData = new Array();
+      imagesData = images.split(',');
+      for ( var i in imagesData) {
+      	this.imageList.push(imagesData[i]);
+      }
+    } 
+  }
+
+}
+</script>
+

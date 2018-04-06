@@ -1,0 +1,212 @@
+<template>
+  	<div class="content" id="Jindex">
+  		<div class="index_wrap">
+  			<div class="swiper-search-wrap">
+  				<div class="search">
+  					<div class="search_box">
+  						<router-link to="/search">
+	  						<em></em>
+	  						<input type="text" name="" value="请输入您要找的产品" readonly="readonly">
+  						</router-link>
+  					</div>
+  					<router-link to="/messageIndex" class="ia">
+  						<span class="dot" v-if="$store.state.messageCount != 0"><b>{{$store.state.messageCount}}</b></span>
+  						<i></i>
+  					</router-link>
+  				</div>
+	            <!-- 轮播图片 -->
+	            <div class="swiper-container" style="height: auto">  
+                    <swiper auto height="200px" dots-position="center">
+					    <template v-for="(it,index) in adimgList ">
+					    	<swiper-item class="black" >
+					    		<router-link :to="{path:'/bannerDetail',query:{id:it.id,sign:it.sign}}">
+					    			<img class="Sw-img" :src="it.image">
+					    		</router-link>
+					    	</swiper-item>
+					    </template>
+					</swiper>      	             
+		        </div>
+	        </div>
+	        <div class="index_type" id="Jscroll">
+	        	<div class="i_typeList">
+	        		<router-link :to="{path:'/articleList',query:{sign:'art_culture'}}" class="iType">
+	        			<img src="../assets/images/index_type_ico1.png" class="type_img"> 
+	        			<p>阿胶文化</p>
+	        		</router-link>
+	        		<router-link to="/businessIntroduction" class="iType">
+	        			<img src="../assets/images/index_type_ico2.png" class="type_img"> 
+	        			<p>企业介绍</p>
+	        		</router-link>
+	        		<router-link :to="{path:'/articleList',query:{sign:'art_new'}}" class="iType">
+	        			<img src="../assets/images/index_type_ico3.png" class="type_img"> 
+	        			<p>企业新闻</p>
+	        		</router-link>
+	        		<router-link :to="{path:'/articleList',query:{sign:'art_knowledge'}}" class="iType">
+	        			<img src="../assets/images/index_type_ico4.png" class="type_img"> 
+	        			<p>养生知识</p>
+	        		</router-link>
+	        		<router-link :to="{path:'/special',query:{sign:'vip_show_group'}}" class="iType">
+	        			<img src="../assets/images/index_type_ico5.png" class="type_img"> 
+	        			<p>VIP专区</p>
+	        		</router-link>
+	        		<router-link to="/groupDetail" class="iType">
+	        			<img src="../assets/images/index_type_ico6.png" class="type_img"> 
+	        			<p>招商加盟</p>
+	        		</router-link>
+	        		<router-link to="/securityCheck" class="iType">
+	        			<img src="../assets/images/index_type_ico7.png" class="type_img"> 
+	        			<p>防伪查询</p>
+	        		</router-link>
+	        		<router-link to="/recentBrowse" class="iType">
+	        			<img src="../assets/images/index_type_ico8.png" class="type_img"> 
+	        			<p>最近浏览</p>
+	        		</router-link>
+	        	</div>
+	        </div>
+	        <div class="yycolumn">
+	        	<div class="icolTop">
+	        		<span></span>
+	        		独具匠心
+	        	</div>
+	        	<div class="iyycolMain">
+	        		<div class="iyym" v-if="duimgList.length > 0">
+	        			<router-link :to="{path:'/special',query:{sign:duone.id}}">
+		        			<div class="imgbox">
+		        				<img :src="duone.image">
+		        			</div>
+		        			<p>{{duone.title}}</p>
+		        		</router-link>
+	        		</div>
+	        		<div class="iyym">
+	        			<div class="iyymsmall" v-if="duimgList.length > 1">
+	        				<router-link :to="{path:'/special',query:{sign:dutwo.id}}">
+		        				<div class="imallImgbox">
+		        					<img :src="dutwo.image">
+		        				</div>
+		        				<p>{{dutwo.title}}</p>
+	        				</router-link>
+	        			</div>
+	        			<div class="iyymsmall" v-if="duimgList.length > 2">
+	        				<router-link :to="{path:'/special',query:{sign:duthree.id}}">
+		        				<div class="imallImgbox">
+		        					<img :src="duthree.image">
+		        				</div>
+		        				<p>{{duthree.title}}</p>
+	        				</router-link>
+	        			</div>
+	        		</div>
+	        	</div>
+	        </div>
+	        <div class="yycolumn">
+	        	<div class="icolTop">
+	        		<span></span>
+	        		最新商品
+	        	</div>
+	        	<div class="igoodsMain">
+	        		<ul>
+	        			<li v-for="(item,index) in goodsList">
+	        				<router-link :to="{path:'/goodsDetail',query:{id:item.id}}">
+		        				<div class="imgbox">
+		        					<img :src="item.goods_image">
+		        				</div>
+		        				<p class="gt">{{item.goods_name}}</p>
+		        				<p class="ppt">
+		        					<span>￥{{item.goods_price}}元</span>
+		        					<span class="buy">{{item.sale_number}}人购买</span>
+		        					<em></em>
+		        				</p>
+		        			</router-link>
+	        			</li>	        			
+	        		</ul>
+	        		<p class="nomore" v-if="nomore == 1">已经到底啦~</p>
+	        	</div>
+	        </div>
+  		</div>
+  	</div>
+</template>
+<script>
+import {Swiper,SwiperItem}from 'vux/src/components/swiper'
+export default {
+
+	data () {
+		return {
+			adimgList : [],
+			duimgList : [],
+			goodsList : [],
+			hasAjax:0,
+			page : 1,
+			nomore : 0,
+			duone : {},
+			dutwo : {},
+			duthree : {}
+	    }
+	},
+	created(){
+		this.$store.commit('loading',{show:true,text:'加载中...'});
+	    this.getdata();
+	    this.getSign();	    
+	},	
+	components : {
+	  	Swiper,
+	    SwiperItem,
+	},
+	mounted(){
+		//this.$store.scrollfun(2);
+	   	this.loadMore();
+	},
+	methods: {
+	  	getdata(){
+	  		this.$http.post('/Shop/Public/getAdData', {sign:'index_banner_group',isGroup:1},{emulateJSON:true}).then(function(response){
+	  			if( response.data.status == "200000" ){
+	            	this.adimgList = response.data.data.adData;
+	  			}	   
+		        this.$http.post('/Shop/Public/getShowData', {sign:'index_show_group',isGroup:1},{emulateJSON:true}).then(function(response){
+		        	if( response.data.status == "200000" ){
+		            	this.duimgList = response.data.data.showData;
+		            	this.duone = this.duimgList[0];
+		            	this.dutwo = this.duimgList[1];
+		            	this.duthree = this.duimgList[2];        		
+		        	}
+		        	this.getGoodsList();  
+		        });	         
+	        });
+	  	},
+	  	getGoodsList : function(){
+	  		if( this.hasAjax == 0 ){
+	  			this.hasAjax = 1;
+		  		this.$http.post('/Shop/Goods/goodsList', {page:this.page,sortType:4},{emulateJSON:true}).then(function(response){	
+		  			this.hasAjax = 0;
+		  			if( this.page == 0 ){
+		  				this.goodsList = response.data.data.list;
+		  				this.page++;		  				
+		  			}else{
+		  				if( response.data.data.list.length == 0 ){		  					
+		  					this.hasAjax = 1;
+		  					this.nomore = 1;
+		  				}else{
+		  					this.page++;
+		  					this.goodsList = this.goodsList.concat(response.data.data.list);
+		  				}
+		  			}
+		  			this.$store.commit('loading',{show:false});	  			      				        
+		        });
+
+		    }
+	  	},
+	    loadMore(){	        
+	        var that = this;
+	        this.$store.commit('scrollFun',{dom:'Jindex',auto:true,bottomCall:function(){
+	        	that.getGoodsList();
+	        }})
+	    },
+	    getSign : function(){
+         this.$http.post('/Shop/User/getSign', {},{emulateJSON:true}).then(function(response){
+            if( response.data.status == 200000 ){
+                this.$store.state.messageCount = response.data.data.count;
+            }   
+          });
+      	}
+	}
+
+}
+</script>

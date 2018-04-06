@@ -1,0 +1,113 @@
+<template>
+  	<div class="content">
+  		<div class="integral_wrap">
+			<div class="s_man_top jibg">
+				<h1>我的钱包</h1>
+				<a class="back" href="javascript:window.history.go(-1);"></a>
+				<p class="money">{{userInfo.money}}</p>
+				<p class="lm">金额</p>
+				<router-link to="/messageIndex" class="news">
+					<i></i>
+					<span class="dot"></span>
+				</router-link>
+			</div>
+			<div class="p_cen_m">
+				<ul class="sm_ul">
+					<li>
+						<router-link to="/myLip">
+							<span class="s1">分润</span>
+							<span class="s2 redt">￥{{userInfo.fenrun_price}}</span>
+							<em class="ei"></em>
+						</router-link>
+					</li>
+					<li>
+						<router-link to="/partnerRedEnvelope">
+							<span class="s1">合伙人红包</span>
+							<span class="s2 redt">￥{{userInfo.red_price}}</span>
+							<em class="ei"></em>
+						</router-link>
+					</li>
+					<li class="pli">
+						<a href="javascript:;" @click="rechargeFun('show')">
+							<span class="s1">充值</span>
+							<span class="s2">微信/支付宝</span>
+							<em class="ei"></em>
+						</a>
+					</li>
+					<li>
+						<router-link to="/withdrawals">
+							<span class="s1">提现</span>
+							<em class="ei"></em>
+						</router-link>
+					</li>
+					<li class="topline">
+						<router-link to="/moneyLog">
+							<span class="s1">收支明细</span>
+							<em class="ei"></em>
+						</router-link>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<!-- 弹窗 -->
+		<div class="mask" :class="{fadeIn : is_pay == true,fadeOut : is_pay == false}"></div>
+		<div class="selpayType" :class="{slideUp : is_pay == true,slideDown : is_pay == false}">
+			<ul>
+				<li :class="{on : is_sel == 'wechat'}" @click="rechargeFun('wechat')">微信</li>
+				<li :class="{on : is_sel == 'alipay'}" @click="rechargeFun('alipay')">支付宝</li>
+			</ul>
+			<a href="javascript:;" @click="rechargeFun('cancel')">取消</a>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      userInfo : {},
+      is_pay : false,
+      is_sel : ''
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."});
+    this.getData();
+  },
+  mounted(){
+  	this.$store.commit('loading',{show:false});
+  },
+  methods: {
+  	getData(){
+    	this.$http.post('/Shop/User/myBalance', {},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+            	this.userInfo = response.data.data.userInfo;	  
+        	}	   
+        });
+    },
+    rechargeFun : function(type){    	
+	    switch (type){
+	    	case "show" :
+	    		if( this.is_pay == false ){
+		    		this.is_pay = true;
+		    	}else{
+		    		this.is_pay = false;
+		    	}
+	    	break;
+	    	case "wechat" :
+	    		this.is_sel = "wechat";
+	    	break;
+	    	case "alipay" : 
+	    		this.is_sel = "alipay";
+	    	break;
+	    	case "cancel" : 
+	    		this.is_pay = false;
+	    		this.is_sel = '';
+	    	break;
+	    }
+    }    
+  }
+
+}
+</script>
+

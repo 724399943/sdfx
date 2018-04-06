@@ -1,0 +1,49 @@
+<template>
+  	<div class="shareWarp">
+  		<div class="pcmain">
+  			<div class="logoTop">皇家会</div>
+  			<div class="smiddle">
+  				<div class="lf">
+  					<img src="http://placehold.it/350x150">
+  				</div>
+  				<div class="rg">
+  					<div class="code">
+  						<div class="imgbox">
+  							<img src="http://placehold.it/350x150">
+  						</div>
+  						<a href="javascript:;" class="down ios"></a>
+  					</div>
+  					<div class="code">
+  						<div class="imgbox">
+  							<img src="http://placehold.it/350x150">
+  						</div>
+  						<a href="javascript:;" class="down android"></a>
+  					</div>
+  				</div>
+  			</div>
+  			<div class="stitle"><span>皇家会</span> 不止于购物</div>
+  		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      
+    }
+  },
+  created(){
+    
+  },
+  computed: {
+    
+  },
+  methods: {
+
+    
+  }
+
+}
+</script>
+

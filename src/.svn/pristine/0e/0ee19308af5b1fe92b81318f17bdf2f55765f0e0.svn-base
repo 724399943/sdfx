@@ -1,0 +1,139 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">修改个人资料</h1>
+			<a href="javascript:window.history.go(-1);"><span class="mail">完成</span></a>
+		</header>
+		<div class="main">
+			<div class="y-bindphone">
+				<ul>
+					<li>
+						<span>头像</span>
+						<div class="imgbox">
+							<img :src="userInfo.headimgurl">
+							<div class="upfile-box">
+                <input type="file" name="" @change="imageuploaded">
+                <!-- <vue-core-image-upload class="btn btn-primary" :crop="false" @imageuploaded="imageuploaded"   :max-file-size="5242880" 
+                url="/Shop/User/photoSave" ></vue-core-image-upload> -->
+              </div>
+						</div>
+					</li>
+					<li class="editpsw">
+						<span>登录账号</span>
+						<p>{{userInfo.phone}}</p>
+					</li>
+					<li>
+						<span>昵称</span>
+						<input type="text" name="" class="name" v-model="userInfo.nickname" @change="ChangeNickname">
+					</li>
+					<li @click="ChangeSex">
+						<span>性别</span>
+						<p v-if="userInfo.sex == 0">保密</p>
+						<p v-else-if="userInfo.sex == 1">男</p>
+						<p v-else>女</p>
+					</li>
+					<li class="editpsw">
+						<router-link to="/forgotPassword">
+							<span>修改密码</span>
+							<i></i>
+						</router-link>
+					</li>
+					<li>
+						<router-link :to="{path:'/replaceBindPhone',query:{phone:userInfo.phone}}">
+							<span>更换绑定手机</span>
+							<i></i>
+						</router-link>
+					</li>
+				</ul>
+			</div>
+			<!-- 弹窗 -->
+			<div class="mask" :class="{fadeIn : sexshow == true,fadeOut : sexshow == false}"></div>
+			<div class="sexbox" v-if="sexshow == true">
+				<p class="line" @click="selSex('1')">男</p>
+				<p @click="selSex('2')">女</p>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+// import VueCoreImageUpload from 'vue-core-image-upload'
+export default {
+  data () {
+    return {
+      userInfo : {},
+      sexshow : false
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."})
+    this.getData();
+  },
+  mounted(){
+  	this.$store.commit('loading',{show:false});
+  },
+  components: {
+    // 'vue-core-image-upload': VueCoreImageUpload,
+  },
+  methods: {
+    getData(){
+    	this.$http.post('/Shop/User/userInfo', {},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+        		this.userInfo = response.data.data.userInfo;            	
+        	}	   
+        });
+    },
+    ChangeNickname(){
+    	this.$http.post('/Shop/User/ajaxChangeNickname', {nickname:this.userInfo.nickname},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+        		this.$store.commit('alert',{show:true,text:response.data.message});    		
+        	}	   
+        });    	
+    },
+    ChangeSex : function(){
+    	if( this.sexshow == false ){
+    		this.sexshow = true;
+    	}else{
+    		this.sexshow = false;    		
+    	}
+    },
+    selSex : function(state){
+    	this.userInfo['sex'] = state;
+		  this.$http.post('/Shop/User/ajaxChangeSex', {sex:this.userInfo.sex},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == "200000" ){
+        		this.$store.commit('alert',{show:true,text:response.data.message}); 
+        		this.sexshow = false;   		
+        	}	   
+        });
+    },//imageuploaded(res) {
+    //     this.userInfo['headimgurl'] = res.data.url;
+    //     this.changeHeadimg();
+    // },
+    imageuploaded(e){
+      var that = this;
+      var files = e.target.files || e.dataTransfer.files
+      var reader = null;
+      reader = new window.FileReader();
+      reader.readAsDataURL(files[0]);
+      reader.onload = function(e){
+        that.$http.post('/Shop/User/photoSave', {field:e.target.result},{emulateJSON:true}).then(function(response){
+            if( response.data.status == "200000" ){
+                that.userInfo.headimgurl = e.target.result;
+                that.changeHeadimg();
+            }
+          })
+      }
+    },
+    changeHeadimg : function(){
+      this.$http.post('/Shop/User/ajaxChangeHeadimg', {headimgurl:this.userInfo.headimgurl},{emulateJSON:true}).then(function(response){
+          if( response.data.status == "200000" ){
+            this.$store.commit('alert',{show:true,text:response.data.message});       
+          }    
+        });
+    }  
+
+  }
+
+}
+</script>
+

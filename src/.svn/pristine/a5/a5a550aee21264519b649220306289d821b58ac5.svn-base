@@ -1,0 +1,228 @@
+<template>
+  	<div class="content">
+  		<div class="centerWarp">
+  			<div class="u-top">
+				<router-link to="/setUp" class="u-top-setting" v-if="userInfo.level == 0 || is_sign == 0"></router-link>
+				<router-link to="/messageIndex" class="u-top-msg" v-if="is_sign == 1">
+					<i></i>
+					<span class="dot"></span>
+				</router-link>
+				<router-link to="/login" class="u-top-msg" v-else>
+					<i></i>
+					<span class="dot"></span>
+				</router-link>
+				<div class="u-top-wrap" v-if="is_sign == 1">
+					<router-link to="/userInfo" class="u-top-user">
+						<img :src="userInfo.headimgurl">
+						<span>{{userInfo.nickname}}</span>
+						<p class="bt" v-if="userInfo.level == 0">普通用户</p>
+						<p class="bt" v-else-if="userInfo.level == 1">普通会员</p>
+						<p class="bt" v-else-if="userInfo.level == 2">VIP会员</p>
+						<p class="bt" v-else="userInfo.level == 3">VIP至尊</p>
+					</router-link>
+				</div>	
+				<!-- 未登录 -->
+				<div class="u-top-nologin" v-else>
+					<router-link to="/register">注册</router-link>
+					<router-link to="/login">登录</router-link>
+				</div>
+			</div>
+			<div class="ysecline">
+				<div class="ym-duipeng" v-if="userInfo.level > 0 && is_sign == 1">
+					<router-link to="/myLip" class="duibox">
+						<span>￥{{userInfo.fenrun_price}}</span>
+						<p>分润</p>
+					</router-link>
+					<router-link to="/partnerRedEnvelope" class="duibox">
+						<span>￥{{userInfo.red_price}}</span>
+						<p>合伙人红包</p>
+					</router-link>
+					<router-link to="/myWallet" class="duibox">
+						<span>￥{{userInfo.money}}</span>
+						<p>我的钱包</p>
+					</router-link>
+				</div>
+				<div class="ym-setboxsec">
+					<router-link :to="{path:'/orderList',query:{status:-1}}" class="title" v-if="is_sign == 1">
+						<span>我的订单</span> 
+						<p class="y-fr">查看更多</p>
+						<i></i>
+					</router-link>
+					<router-link to="/login" class="title" v-else>
+						<span>我的订单</span> 
+						<p class="y-fr">查看更多</p>
+						<i></i>
+					</router-link>
+				</div>
+				<div class="ymysetbox-tab clearfix">
+					<router-link :to="{path:'/orderList',query:{status:1}}" class="ybox" v-if="is_sign == 1">
+						<div class="icondiv">
+							<i class="icon"><em><b>{{orderData.not_pay}}</b></em></i>
+						</div>
+						待付款
+					</router-link>
+					<router-link to="/login" class="ybox" v-else>
+						<div class="icondiv">
+							<i class="icon"></i>
+						</div>
+						待付款
+					</router-link>
+					<router-link :to="{path:'/orderList',query:{status:2}}" class="ybox" v-if="is_sign == 1">
+						<div class="icondiv">
+							<i class="icon"><em><b>{{orderData.not_express}}</b></em></i>
+						</div>
+						待发货
+					</router-link>
+					<router-link to="/login" class="ybox" v-else>
+						<div class="icondiv">
+							<i class="icon"></i>
+						</div>
+						待发货
+					</router-link>
+					<router-link :to="{path:'/orderList',query:{status:3}}" class="ybox" v-if="is_sign == 1">
+						<div class="icondiv">
+							<i class="icon"><em><b>{{orderData.not_received}}</b></em></i>
+						</div>
+						待收货
+					</router-link>
+					<router-link to="/login" class="ybox" v-else>
+						<div class="icondiv">
+							<i class="icon"></i>
+						</div>
+						待收货
+					</router-link>
+					<router-link :to="{path:'/orderList',query:{status:4}}" class="ybox" v-if="is_sign == 1">
+						<div class="icondiv">
+							<i class="icon"><em><b>{{orderData.not_comment}}</b></em></i>
+						</div>
+						待评价
+					</router-link>
+					<router-link to="/login" class="ybox" v-else>
+						<div class="icondiv">
+							<i class="icon"></i>
+						</div>
+						待评价
+					</router-link>
+				</div>
+				<div class="p_cen_m">
+					<ul>
+						<li v-if="userInfo.level > 0">
+							<router-link to="/myTeam">
+								<em class="ico1"></em>
+								<span class="s1">我的团队</span>
+								<em class="ei"></em>
+							</router-link>
+						</li>
+						<li v-else-if="is_sign == 0">
+							<router-link to="/login">
+								<em class="ico1"></em>
+								<span class="s1">我的团队</span>
+								<em class="ei"></em>
+							</router-link>
+						</li>
+						<li v-if="userInfo.level > 0">
+							<router-link to="/invitationCode">
+								<em class="ico2"></em>
+								<span class="s1">我的邀请码</span>
+								<em class="ei"></em>
+							</router-link>
+						</li>
+						<li v-else-if="is_sign == 0">
+							<router-link to="/login">
+								<em class="ico2"></em>
+								<span class="s1">我的邀请码</span>
+								<em class="ei"></em>
+							</router-link>
+						</li>
+						<li v-if="is_sign == 1">
+							<a :href="'tel:'+ servicephone">
+								<em class="ico3"></em>
+								<span class="s1">平台客服</span>
+								<em class="ei"></em>
+							</a>
+						</li>
+						<li v-if="userInfo.level == 0 || is_sign == 0">
+							<router-link to="/myWallet">
+								<em class="ico7"></em>
+								<span class="s1">我的钱包</span>
+								<em class="ei"></em>
+							</router-link>
+						</li>
+						<li>
+							<router-link to="/collectList" v-if="is_sign == 1">
+								<em class="ico4"></em>
+								<span class="s1">我的收藏</span>
+								<em class="ei"></em>
+							</router-link>
+							<router-link to="/login" v-else>
+								<em class="ico4"></em>
+								<span class="s1">我的收藏</span>
+								<em class="ei"></em>
+							</router-link>
+						</li>
+						<li>
+							<router-link to="/consigneeList" v-if="is_sign == 1">
+								<em class="ico5"></em>
+								<span class="s1">我的收货地址</span>
+								<em class="ei"></em>
+							</router-link>
+							<router-link to="/login" v-else>
+								<em class="ico5"></em>
+								<span class="s1">我的收货地址</span>
+								<em class="ei"></em>
+							</router-link>
+						</li>
+						<li v-if="userInfo.level > 0">
+							<router-link to="/setUp" v-if="is_sign == 1">
+								<em class="ico6"></em>
+								<span class="s1">设置</span>
+								<em class="ei"></em>
+							</router-link>
+							<router-link to="/login" v-else>
+								<em class="ico6"></em>
+								<span class="s1">设置</span>
+								<em class="ei"></em>
+							</router-link>
+						</li>
+					</ul>
+				</div>
+			</div>
+  		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      userInfo : {},
+      is_sign : 0,
+      orderData : {},
+      servicephone : ''
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."})
+    this.getData();
+  },  
+  mounted(){
+  	this.$store.commit('loading',{show:false});
+  },
+  methods: {
+    getData(){
+    	this.$http.post('/Shop/User/index', {},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == 200000 ){
+        		this.is_sign = 1;
+        		this.userInfo = response.data.data.userInfo;
+        		this.orderData = response.data.data.orderData;   
+        		this.servicephone = response.data.data.servicephone;  		
+        	}else{
+        		this.is_sign = 0;
+        	}	   
+        });
+    }
+  }
+
+}
+</script>
+

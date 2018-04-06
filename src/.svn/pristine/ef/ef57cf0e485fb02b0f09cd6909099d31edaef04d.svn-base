@@ -1,0 +1,88 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">支付</h1>
+		</header>
+		<div class="main">
+			<p class="order_num">订单号：{{orderInfo.order_sn}}</p>
+			<div class="paywrap">
+				<ul>
+					<li :class="{on : mode == 'wechat'}" @click="selPayMode('wechat')">
+						<div class="o_pay">
+							<em class="wechat"></em>
+							<span>微信支付</span>
+						</div>
+					</li>
+					<li :class="{on : mode == 'alipay'}" @click="selPayMode('alipay')">
+						<div class="o_pay">
+							<em class="alipay"></em>
+							<span>支付宝支付</span>
+						</div>
+					</li>
+					<li :class="{on : mode == 'balance'}" @click="selPayMode('balance')">
+						<div class="o_pay">
+							<em class="balance"></em>
+							<span>余额支付</span>
+							<i>余额：{{userInfo.money}}</i>
+						</div>
+					</li>
+				</ul>
+				<div class="topay">
+					<span>应付金额</span>
+					<i>￥{{orderInfo.total}}</i>
+					<a href="javascript:;" class="pay_btn" @click="payFun">付款</a>
+				</div>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      orderInfo : {},
+      userInfo : {},
+      mode : 'wechat'
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."});
+    this.getData();
+  },
+  mounted(){
+  	this.$store.commit('loading',{show:false}); 
+  },
+  methods: {
+  	getData(){
+  		this.$http.post('/Shop/Pay/pay', {order_sn:this.$route.query.order_sn},{emulateJSON:true}).then(function(response){    		
+    		if( response.data.status == "200000" ){	    		     
+	        	this.orderInfo = response.data.data.orderInfo;	
+	        	this.userInfo = response.data.data.userInfo;
+    		}else{
+    			this.$store.commit('alert',{show:true,text:response.data.message});
+    		}	
+        });
+  	},
+  	selPayMode : function(mode){
+  		this.mode = mode;
+  	},payFun(){
+  		if(this.mode != 'balance'){
+  			window.location.href="mitchell://"+this.mode+'?order_sn='+this.$route.query.order_sn;
+  		}else{
+  			this.$http.post('/Shop/Pay/walletPay', {order_sn:this.$route.query.order_sn},{emulateJSON:true}).then(function(response){    		
+	    		if( response.data.status == 200000 ){	    		     
+		        	this.$router.replace('/paySuccess?order_sn='+this.$route.query.order_sn);
+	    		}else{
+	    			this.$store.commit('alert',{show:true,text:response.data.message});
+	    		}	
+            });
+  		}
+  		
+  	}
+  }
+
+}
+</script>
+

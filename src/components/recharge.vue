@@ -1,0 +1,97 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:;" @click="routeBack"></a>
+			<h1 class="y-confirm-order-h1">充值</h1>
+		</header>
+		<div class="main">
+			<div class="withdrawals">
+				<div class="wdraw_top">
+					<p>充值金额</p>
+					<input type="text" name="" :placeholder="tips" v-model="amount">
+				</div>
+				<div class="paywrap">
+					<ul>
+						<li @click="rechargeFun('wechat')" :class="{on:is_sel == 'wechat'}">
+							<div class="o_pay">
+								<em class="wechat"></em>
+								<span>微信支付</span>
+							</div>
+						</li>
+						<li @click="rechargeFun('alipay')" :class="{on:is_sel == 'alipay'}">
+							<div class="o_pay">
+								<em class="alipay"></em>
+								<span>支付宝支付</span>
+							</div>
+						</li>						
+					</ul>
+					<div class="topay">
+						<span>应付金额</span>
+						<i>￥{{amount}}</i>
+						<a href="javascript:;" class="pay_btn" @click="toPay">付款</a>
+					</div>
+				</div>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      is_sel : 'wechat',
+      amount : '',
+      is_type : 4,
+      miniConsumption : '',
+      tips : ''
+    }
+  },
+  created(){
+    this.getData();
+  },
+  computed: {
+    
+  },
+  methods: {   
+    rechargeFun : function(type){    	
+	    switch (type){	    	
+	    	case "wechat" :
+	    		this.is_sel = "wechat";
+	    		this.is_type = 4;
+	    	break;
+	    	case "alipay" : 
+	    		this.is_sel = "alipay";	   
+	    		this.is_type = 3; 		
+	    	break;	    	
+	    }
+    },
+    toPay : function(){
+    	if( this.amount ){
+	    	this.$http.post('/Shop/Pay/recharge', {amount:this.amount,type:this.is_type},{emulateJSON:true}).then(function(response){	
+	    		if(response.data.status == '200000'){
+					window.location.href="mitchell://myWallet?type="+this.is_type+"&amount="+this.amount;
+					this.amount = '';	    			    		
+				}   	
+		    });   	    		
+    	}else{
+			this.$store.commit('alert',{show:true,text:"最低充值"+this.miniConsumption+"元"});
+			this.amount = '';
+		} 
+    },
+    getData(){
+    	this.$http.post('/Shop/Public/getConfig', {},{emulateJSON:true}).then(function(response){
+  			if( response.data.status == "200000" ){
+  				this.miniConsumption = response.data.data.config.miniConsumption;
+            	this.tips = "请输入(最低充值"+this.miniConsumption+"元)";            	
+  			}	   
+        });
+    },
+    routeBack : function(){
+      this.$router.go(-1);
+    }
+  }
+
+}
+</script>
+

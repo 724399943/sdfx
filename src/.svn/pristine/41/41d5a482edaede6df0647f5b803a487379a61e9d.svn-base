@@ -1,0 +1,147 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<h1 class="y-confirm-order-h1">购物车</h1>
+			<router-link to="/editShoppingCart"><span class="edit" v-if="is_sign == 1,list != ''"></span></router-link>
+		</header>
+		<div class="main">
+			<div class="shopcarGoods" v-if="is_sign == 1,list != ''">
+				<div class="integral_goods">
+					<div class="is_hgoods">
+						<div class="sel_goodsm">
+							<ul>
+								<template v-for="(item,index) in list">
+									<a href="javascript:;">
+										<li>
+											<div class="s_goods_wrap">
+												<div class="s_cbox">
+													<input type="checkbox" name="" :id="item.id" :value="item.id" v-model="shop_id" @change="checkFun(item.goods_id)"> 
+													<label :for="item.id"></label>
+												</div>
+											</div> 
+											<router-link :to="{path:'/goodsDetail',query:{id:item.goods_id}}">
+												<div class="imgbox">
+													<img :src="item.goods_image">
+												</div>
+												<div class="se_ggg sexiao">
+												 	<h1 class="db-overflow">{{item.goods_name}}</h1>
+												 	<p class="ggpt db-overflow">
+												 		<span v-for="(it,index) in item.attrList">{{it.attr_value}}</span>
+												 	</p>
+												 	<p class="ggprice">
+												 		<span>￥{{item.goods_price}}</span>
+												 		<span>x{{item.goods_number}}</span>
+												 	</p>
+												</div>
+											</router-link>
+										</li>
+									</a>
+								</template>
+							</ul>
+						</div> 
+					</div>
+				</div>
+			</div>
+		  	<!-- 未登录 -->
+			<div class="nologin_cont" v-if="is_sign == 0">
+				<img src="../assets/images/scnogoods_ico.png">
+				<p>您尚未登录</p>
+				<div class="btn">
+					<router-link to="/register">注册</router-link>
+					<router-link to="/login" class="login">登录</router-link>
+				</div>
+			</div>
+
+		  	<!-- 购物车暂无商品 -->
+			<div class="nologin_cont" v-if="list == '' && is_sign == 1 ">
+				<img src="../assets/images/scnogoods_ico.png">
+				<p>您的购物车暂无商品~</p>
+				<router-link to="/" class="suibtn">随便逛逛</router-link>
+			</div>	  	
+			<div class="goods_total" v-if="is_sign == 0,list != ''">
+				<div class="gtal_m">
+					<div class="gtalcheck">
+						<div class="check_box">
+							<input type="checkbox" name="" id="AllCheck" @change="checkedAll">
+							<label for="AllCheck"></label>
+						</div>
+					</div>
+					<span class="all">全选</span>
+					<span>合计：￥{{total}}</span> 
+				</div>
+				<a href="javascript:;" @click="JtoOrderInfo">结算</a>
+			</div>			
+		</div>
+  	</div>
+
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      list : [],
+      total : '',
+      is_sign : 1,
+      goodsID : [],
+      shop_id : []
+    }
+  },
+  created(){
+    this.$store.commit('loading',{show:true,text:"加载中..."});
+    this.getData();
+  },
+  mounted(){
+  	this.$store.commit('loading',{show:false});
+  },
+  methods: {
+  	getData : function(){
+  		this.$http.post('/Shop/Shop/shoppingCart', {},{emulateJSON:true}).then(function(response){
+        	if( response.data.status == 200000 ){
+        		this.is_sign = 1;
+        		this.list = response.data.data.result.shoppingCart;
+        		this.total = response.data.data.result.total;        		            	
+        	}else{
+        		this.is_sign = 0;
+        	}	   
+        });
+  	},
+  	checkFun : function(goods_id){
+  		var el = document.getElementById('AllCheck');  		
+  		if( event.target.checked ){
+  			this.goodsID.push(goods_id);
+  		}else{
+  			for(var i = 0;i < this.goodsID.length;i++){
+  				if( this.goodsID[i] == goods_id ){
+  					this.goodsID.splice(i,1);
+  				}
+  			}
+  		}
+  		if( this.goodsID.length == this.list.length ){
+  			el.checked = true;
+  		}else{
+  			el.checked = false;
+  		}
+  	},
+  	checkedAll : function(){
+  		this.goodsID = [];	
+  		this.shop_id = [];	
+  		if( event.target.checked ){
+	  		for(var i = 0;i < this.list.length;i++){
+	  			this.goodsID.push(this.list[i]['goods_id']);
+	  			this.shop_id.push(this.list[i]['id']);
+	  		}
+  		}
+  	},
+  	JtoOrderInfo : function(){
+  		if( this.shop_id == '' ){
+  			this.$store.commit('alert',{show:true,text:"请选择商品~"});
+  		}else{
+  			var ids = this.shop_id.join(',');
+  			this.$router.push({path:'/orderInfo',query:{id:ids}});
+  		}
+  	}
+  }
+
+}
+</script>

@@ -1,0 +1,102 @@
+<template>
+  	<div class="content">
+  		<header class="head">
+			<a class="back" href="javascript:window.history.go(-1);"></a>
+			<h1 class="y-confirm-order-h1">咨询</h1>
+			<a :href="'mitchell://chat?kefu=kefu_001'+'&tel='+$route.query.tel"><span class="call"></span></a>
+		</header>
+		<div class="main">
+			<div class="imchat_wrap">    
+			    <div id="em-kefu-webim-chat" class="em-widget-wrapper">
+			        <div id="em-widgetBody" class="em-widgetBody-wrapper diyScroll">
+			            <div class="em-widget-chat">
+			                <div class="em-widget-date"><span>6月5日 12:03</span></div>
+			                <div class="em-widget-left">
+			                    <div class="em-widget-msg-wrapper">
+			                        <i class="icon-corner-left">
+			                        	<img src="http://placehold.it/350x150">
+			                        </i>
+			                        <div class="em-widget-msg-container em-widget-msg-txt">
+			                            <span>您好，有什么可以帮助您的吗？</span>
+			                        </div>
+			                        <div class="emcaoTips">
+			                        	<div class="triangle-up"></div>
+			                        	<div class="operation">
+			                        		<span>删除</span>
+			                        		<span>|</span>
+			                        		<span>复制</span>
+			                        	</div>
+			                        </div>
+			                    </div>
+			                </div>
+			                <div class="em-widget-right">
+			                    <div class="em-widget-msg-wrapper">
+			                        <i class="icon-corner-right">
+			                        	<img src="http://placehold.it/350x150">
+			                        </i>
+			                        <div class="em-widget-msg-container em-widget-msg-txt">
+			                            <span>你好</span>
+			                        </div>
+			                        <div class="emcaoTips">
+			                        	<div class="triangle-up"></div>
+			                        	<div class="operation">
+			                        		<span>删除</span>
+			                        		<span>|</span>
+			                        		<span>复制</span>
+			                        	</div>
+			                        </div>
+			                    </div>
+			                </div>
+			            </div>
+			        </div>
+			        <div id=em-widgetSend class=em-widget-send-wrapper>
+			            <div class=toolbar>
+			           		<i class="em-add-open icon-face e-face fg-hover-color" title=功能 id="openFun"></i>
+			           		<i class="em-address-ye icon-face e-face fg-hover-color" title=发送 id="sendPrivateText"></i>
+			                <div contenteditable="true" class=em-widget-div spellcheck=false id="talkInputId">请输入文字</div>
+			            </div>
+			            <div class="open-upload-box" id="OuploadImg">
+			            	<div class="o_up_main">
+			            		<div class="imgbox">
+			            			<img src="../assets/images/chat_upload_img.png">
+			            			<input id=em-widget-img-input type=file class=upload-img-container accept=image/* > 
+			            		</div>
+			            		<p>图片</p>
+			            	</div>
+			            	<div class="o_up_main">
+			            		<div class="imgbox">
+			            			<img src="../assets/images/chatPhotograph.png">
+			            			<input id=em-widget-img-input type=file capture="camera" class=upload-img-container accept=image/* > 
+			            		</div>
+			            		<p>拍照</p>
+			            	</div>
+			            </div>
+			        </div>
+			    </div>
+			    </div>
+			</div>
+		</div>
+  	</div>
+</template>
+<script>
+export default {
+
+  data () {
+    return {
+      
+    }
+  },
+  created(){
+    
+  },
+  computed: {
+    
+  },
+  methods: {
+
+    
+  }
+
+}
+</script>
+
